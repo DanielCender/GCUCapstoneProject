@@ -1,13 +1,27 @@
 import http from 'http'
 import express from 'express'
 import cors from 'cors'
+import { Client } from 'pg';
 import { Server, LobbyRoom } from 'colyseus'
 import { monitor } from '@colyseus/monitor'
 import { RoomType } from '../types/Rooms'
+// import { LittleOffice } from './rooms/LittleOffice'
 
-// import socialRoutes from "@colyseus/social/express"
+import { APP_CONFIG } from './config';
 
-import { SkyOffice } from './rooms/SkyOffice'
+const environment = APP_CONFIG();
+
+const client = new Client({
+    connectionString: environment.DATABASE_URL,
+    ssl: {
+      rejectUnauthorized: false
+    }
+  });
+  
+client
+  .connect()
+  .then(() => console.log('connected'))
+  .catch((err) => console.error('connection error', err.stack))
 
 const port = Number(process.env.PORT || 2567)
 const app = express()
@@ -23,13 +37,17 @@ const gameServer = new Server({
 
 // register room handlers
 gameServer.define(RoomType.LOBBY, LobbyRoom)
-gameServer.define(RoomType.PUBLIC, SkyOffice, {
-  name: 'Public Lobby',
-  description: 'For making friends and familiarizing yourself with the controls',
-  password: null,
-  autoDispose: false,
-})
-gameServer.define(RoomType.CUSTOM, SkyOffice).enableRealtimeListing()
+
+// gameServer.define(RoomType.CUSTOM, LittleOffice).enableRealtimeListing()
+// gameServer.define(RoomType.PROTECTED, LittleOffice).enableRealtimeListing()
+
+/* Maybe not the ones below */
+// gameServer.define(RoomType.PUBLIC, SkyOffice, {
+//   name: 'Public Lobby',
+//   description: 'For making friends and familiarizing yourself with the controls',
+//   password: null,
+//   autoDispose: false,
+// })
 
 /**
  * Register @colyseus/social routes
@@ -39,7 +57,6 @@ gameServer.define(RoomType.CUSTOM, SkyOffice).enableRealtimeListing()
  */
 // app.use("/", socialRoutes);
 
-// register colyseus monitor AFTER registering your room handlers
 app.use('/colyseus', monitor())
 
 gameServer.listen(port)
