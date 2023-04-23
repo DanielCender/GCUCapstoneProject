@@ -1,0 +1,14 @@
+{
+  "name": "types",
+  "version": "1.0.0",
+  "description": "types for little offices",
+  "main": "index.js",
+  "license": "none",
+  "private": false,
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "@colyseus/schema": "^1.0.45"
+  }
+}
