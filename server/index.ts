@@ -21,7 +21,7 @@ const client = new Client({
 client
   .connect()
   .then(() => console.log('connected'))
-  .catch((err) => console.error('connection error', err.stack))
+  .catch((err: Error) => console.error('connection error', err.stack))
 
 const port = Number(process.env.PORT || 2567)
 const app = express()
