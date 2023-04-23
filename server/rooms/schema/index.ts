@@ -1,4 +1,3 @@
-import { v4 as uuid } from 'uuid';
 import { Schema, ArraySchema, SetSchema, MapSchema, type } from '@colyseus/schema'
 import {
   IPlayer,
@@ -39,14 +38,14 @@ export class OfficeState extends Schema implements IOfficeState {
 }
 
 export const whiteboardRoomIds = new Set<string>()
-// const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
-// const charactersLength = characters.length
-//   for (let i = 0; i < 12; i++) {
-//     result += characters.charAt(Math.floor(Math.random() * charactersLength))
-//   }
+const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
+const charactersLength = characters.length
 
 function getRoomId() {
-  let result = uuid();
+    let result = '';
+    for (let i = 0; i < 12; i++) {
+      result += characters.charAt(Math.floor(Math.random() * charactersLength))
+    }
   if (!whiteboardRoomIds.has(result)) {
     whiteboardRoomIds.add(result)
     return result
