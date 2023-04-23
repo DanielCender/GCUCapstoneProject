@@ -7,12 +7,12 @@ import { monitor } from '@colyseus/monitor'
 import { RoomType } from '../types/Rooms'
 // import { LittleOffice } from './rooms/LittleOffice'
 
-import { APP_CONFIG } from './config';
+// import { APP_CONFIG } from './config';
 
-const environment = APP_CONFIG();
+// const environment = APP_CONFIG();
 
 const client = new Client({
-    connectionString: environment.DATABASE_URL,
+    connectionString: process.env.DATABASE_URL,
     ssl: {
       rejectUnauthorized: false
     }
