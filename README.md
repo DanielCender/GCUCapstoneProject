@@ -4,6 +4,13 @@
 
 A WebSocket-enabled virtual networking application with collaboration features for friends, hobby groups, or professional teams.
 
+## Official Hosted Deployment
+
+Colyseus Service: [https://little-offices.herokuapp.com/colyseus/#/](https://little-offices.herokuapp.com/colyseus/#/)
+
+Web Client: [https://dcgcucapstone.netlify.app/](https://dcgcucapstone.netlify.app/)
+
+
 ## Start Application
 
 Start by installing dependencies:

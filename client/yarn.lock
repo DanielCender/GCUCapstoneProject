@@ -1656,6 +1656,11 @@ its-fine@^1.0.6:
   dependencies:
     "@types/react-reconciler" "^0.28.0"
 
+js-cookie@^3.0.4:
+  version "3.0.4"
+  resolved "https://registry.yarnpkg.com/js-cookie/-/js-cookie-3.0.4.tgz#9ae3c5f6eb34d2292d76e0579fabfe7c872e1fae"
+  integrity sha512-tlu5VGqPFMP5eBefnmszCFZkPXG2n527NRN9XdNtN6FZ5n/0e98TdDm8BOz290OIIsxtXb9XTJjfqE6gVhOHQw==
+
 js-sdsl@^4.1.4:
   version "4.4.0"
   resolved "https://registry.yarnpkg.com/js-sdsl/-/js-sdsl-4.4.0.tgz#8b437dbe642daa95760400b602378ed8ffea8430"
@@ -2191,6 +2196,13 @@ swiper@^9.2.4:
   dependencies:
     ssr-window "^4.0.2"
 
+swr@^2.1.4:
+  version "2.1.4"
+  resolved "https://registry.yarnpkg.com/swr/-/swr-2.1.4.tgz#f5b5cfb3d43f04beb23ae012e0b0c9f8ec395ed1"
+  integrity sha512-NG+eu3s3YT7aCnL0BRzsYIh8U0HhzA4II1bNMTUtO5D+N+4+YJpcfLiagFdrt0IbTGCbOiVyzAIMvqOCsk9cQA==
+  dependencies:
+    use-sync-external-store "^1.2.0"
+
 text-table@^0.2.0:
   version "0.2.0"
   resolved "https://registry.yarnpkg.com/text-table/-/text-table-0.2.0.tgz#7f5ee823ae805207c00af2df4a84ec3fcfa570b4"
@@ -2279,6 +2291,11 @@ uri-js@^4.2.2:
   integrity sha512-7rKUyy33Q1yc98pQ1DAmLtwX109F7TIfWlW1Ydo8Wl1ii1SeHieeh0HHfPeL2fMXK6z0s8ecKs9frCuLJvndBg==
   dependencies:
     punycode "^2.1.0"
+
+use-sync-external-store@^1.2.0:
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/use-sync-external-store/-/use-sync-external-store-1.2.0.tgz#7dbefd6ef3fe4e767a0cf5d7287aacfb5846928a"
+  integrity sha512-eEgnFxGQ1Ife9bzYs6VLi8/4X6CObHMw9Qr9tPY43iKwsPw8xE8+EFsf/2cFZ5S3esXgpWgtSCtLNS41F+sKPA==
 
 utility-types@^3.10.0:
   version "3.10.0"

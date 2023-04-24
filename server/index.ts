@@ -1,23 +1,30 @@
 import http from 'http'
 import express from 'express'
 import cors from 'cors'
-import { Client } from 'pg';
+import cookieParser from 'cookie-parser'
+import bcrypt from 'bcrypt'
+import jwt from 'jsonwebtoken';
+import { Client } from 'pg'
 import { Server, LobbyRoom } from 'colyseus'
 import { monitor } from '@colyseus/monitor'
 import { RoomType } from '../types/Rooms'
 // import { LittleOffice } from './rooms/LittleOffice'
 
-// import { APP_CONFIG } from './config';
+import { APP_CONFIG } from './config'
 
-// const environment = APP_CONFIG();
+const environment = APP_CONFIG()
+
+const signCookieForUser = (username: string, signature: string) => {
+  return JSON.stringify(jwt.sign({ username, iat: Date.now(), exp: Math.floor(Date.now() / 1000) + (60 * 60 * 24) }, signature));
+}
 
 const client = new Client({
-    connectionString: process.env.DATABASE_URL,
-    ssl: {
-      rejectUnauthorized: false
-    }
-  });
-  
+  connectionString: environment.DATABASE_URL,
+  ssl: {
+    rejectUnauthorized: false,
+  },
+})
+
 client
   .connect()
   .then(() => console.log('connected'))
@@ -28,7 +35,119 @@ const app = express()
 
 app.use(cors())
 app.use(express.json())
-// app.use(express.static('dist'))
+
+
+const AUTH_COOKIE = 'littleOfficesAuth';
+
+app.use(cookieParser(environment.JWT_SIGNATURE));
+
+// REST Routes
+app.post('/login', async (req: { cookies: any; body: { username: string; password: string } }, res) => {
+  if(req.cookies[AUTH_COOKIE]) {
+    console.log('has cookie')
+    try {
+    const decoded = jwt.verify(req.cookies[AUTH_COOKIE], environment.JWT_SIGNATURE);
+    console.log('decoded jwt: ', JSON.stringify(decoded, null, 2))
+    res.cookie(AUTH_COOKIE, signCookieForUser(req.body.username, environment.JWT_SIGNATURE), { maxAge: 60 * 24 });
+    res.status(200).send({ message: 'Already logged in!'});
+    return;
+    // renew cookie
+    } catch(err) {
+      // err - invalid or exp token
+      console.log('jwt decoding err: ', JSON.stringify(err, null, 2));
+    }
+  }
+
+  const { username, password } = req.body;
+
+  console.log('/login req.body', JSON.stringify(req.body, null, 2))
+
+  const text = 'SELECT * FROM users WHERE username = $1'
+  const values = [username]
+  try {
+    const queryRes = await client.query(text, values)
+    console.log(queryRes.rows[0])
+
+    const [userToCheck] = queryRes.rows
+    const match = await bcrypt.compare(password, userToCheck?.password ?? '')
+
+    if (match) {
+      // Successful login
+      // issue token valid for 24-hours
+      console.log('jwt about to set: ', signCookieForUser(username, environment.JWT_SIGNATURE))
+      res.cookie(AUTH_COOKIE, signCookieForUser(username, environment.JWT_SIGNATURE),{ maxAge: 60 * 24 });
+      res.status(200).send({ message: 'Logged in successfully!', username: userToCheck.username })
+    } else {
+      res.status(401).send({ message: 'Invalid username or password!' })
+    }
+    // { name: 'brianc', email: 'brian.m.carlson@gmail.com' }
+  } catch (err) {
+    console.log(err.stack)
+    res.status(500).send({ message: 'Server error encountered' })
+  }
+})
+
+app.post('/signup', async (req: { cookies: any; body: { username: string; password: string } }, res) => {
+  if(req.cookies[AUTH_COOKIE]) {
+    res.status(200).send({ message: 'Already logged in!'});
+    return;
+  }
+
+  console.log('/signup req.body', JSON.stringify(req.body, null, 2))
+  const saltRounds = 10
+  const { username, password } = req.body
+
+  if (!username || username.length < 6) {
+    res.status(422).send({ message: 'Need to specify a username at least 6 characters long' })
+    return
+  }
+
+  if (password.length < 8) {
+    res.status(422).send({ message: 'Password must be at least 8 characters long' })
+    return
+  }
+
+  // Check for any matching usernames
+  try {
+    const usernameCheckQuery = 'SELECT * FROM users WHERE username LIKE $1'
+    const usernameCheckValues = [`%${username}%`]
+    const queryRes = await client.query(usernameCheckQuery, usernameCheckValues)
+
+    if (queryRes.rows.length > 0) {
+      res.status(422).send({ message: 'Username already taken, sorry!' })
+      return
+    }
+  } catch (err) {
+    console.log(err.stack)
+    res.status(500).send({ message: 'Server error encountered' })
+    return
+  }
+
+  bcrypt.hash(password, saltRounds, async function (err, hash) {
+    if (err) {
+      res.status(500).send({ message: 'Failed to hash password, server issue' })
+      return
+    }
+
+    // Store hash in your password DB.
+    const userInsertQuery = 'INSERT INTO users(username, password) VALUES($1, $2) RETURNING *'
+    const userInsertValues = [username, hash]
+    try {
+      const signupRes = await client.query(userInsertQuery, userInsertValues)
+    
+      console.log(signupRes.rows[0])
+      if(signupRes.rows[0].username === username) {
+        res.status(200).send({ message: 'Signup completed!', username })
+      } else {
+        res.status(500).send({ message: 'Issue with processing signup request' })
+      }
+    } catch (err) {
+      console.log(err.stack)
+    }
+  })
+})
+
+app.listen(3000) // for http interactions
 
 const server = http.createServer(app)
 const gameServer = new Server({

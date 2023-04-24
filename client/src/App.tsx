@@ -3,17 +3,23 @@ import { muiTheme } from './MuiTheme';
 
 import './App.css'
 
-import {Home} from './pages/Home';
+// * App state
+import { UserContextProvider } from './state/UserContext';
+import { NavContextProvider } from './state/NavContext';
 
-
-
+// * App Containers/pages
+import { SiteContainer } from './containers/index';
 
 function App() {
   
   return (
     <>
     <ThemeProvider theme={muiTheme}>
-      <Home/>
+      <UserContextProvider>
+        <NavContextProvider>
+        <SiteContainer />
+        </NavContextProvider>
+      </UserContextProvider>
     </ThemeProvider>
     </>
   )

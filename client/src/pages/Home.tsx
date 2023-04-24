@@ -1,55 +1,83 @@
-import { useState } from 'react';
 import { styled } from '@mui/system';
-import reactLogo from '../assets/react.svg'
-import viteLogo from '/vite.svg'
+import secondaryImg from '../assets/charlesdeluvio-home-hands.jpg';
+import { PageWrapper } from '../components/PageWrapper';
 
+const CallToActionWrapper = styled('div')`
+  display: flex;
+  flex-direction: row;
+  justify-content: space-evenly;
+  align-items: center;
+`
 
-const StyledButton = styled('button')`
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
+const TextActionBox = styled('div')`
+  flex: 1;
+  margin: 1rem 2rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-self: flex-start;
+`
+
+const TextBlock = styled('p')`
+  display: block;
+  flex: 1;
+  font-size: 1.5rem;
   font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
-  cursor: pointer;
-  transition: border-color 0.25s;
+  font-family: Roboto, sans-serif;
+  align-self: flex-start;
+  text-align: left;
+`
 
-&:hover {
-  border-color: #646cff;
-}
+const SecondaryImage = styled('img')`
+background-size: cover; 
+width: 200px;
+  height: 300px;
+  object-fit: cover;
+flex: 1;
+`
 
-&:focus,
-&:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
-}
+const StyledList = styled('ul')`
+display: block;
+flex: 1;
+font-size: 1.5rem;
+font-weight: 500;
+font-family: Roboto, sans-serif;
+align-self: flex-start;
+text-align: left;
+list-style: inside;
 `;
 
+
 const Home = () => {
-    const [count, setCount] = useState(0)
     return (
-        <>
-        <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <StyledButton onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </StyledButton>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-      </>
+      <PageWrapper>
+        <CallToActionWrapper>
+          <TextActionBox>
+        <TextBlock>{`
+        Little Offices is a digital workspace for the disconnected, a social watering hole for the distant, and a meeting space for those unmet.
+        `}  
+        </TextBlock>
+        <TextBlock>
+        {`We combined state-of-the-art transmission standards for vocal communications over the web with traditional text and visual mediums, crafting a space where creators and learners can all access their ideal methods for channeling new ideas.`}
+        </TextBlock>
+        </TextActionBox>
+        <SecondaryImage src={secondaryImg} />
+        <TextActionBox>
+          <StyledList>
+            Current stable features:
+            <li>Text chat</li>
+            <li>Private World Spaces</li>
+          </StyledList>
+          <StyledList>
+            Coming Soon!:
+            <li>Voice chat</li>
+            <li>Digital Whiteboard</li>
+            <li>Interactable Virtual Environment</li>
+          </StyledList>
+          <TextBlock>{`Create an account and start collaborating today!`}</TextBlock>
+        </TextActionBox>
+        </CallToActionWrapper>
+        </PageWrapper>
     )
 }
 
