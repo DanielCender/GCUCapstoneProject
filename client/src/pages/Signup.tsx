@@ -56,7 +56,7 @@ export const Signup = () => {
 
 
         try {
-            const response = await fetch('http://localhost:3000/signup', {
+            const response = await fetch(`${import.meta.env.VITE_LITTLE_OFFICES_SERVER_URL}/signup`, {
               method: "POST",
               headers: {
                 "Content-Type": "application/json",
