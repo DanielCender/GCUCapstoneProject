@@ -11,7 +11,8 @@ const getCurrentPage = (appPage: AppPage) => {
         'home': <Home />,
         'login': <Login />,
         'signup': <Signup />,
-        'worldselect': <>Now at world select, coming soon</>,
+        'worldselect': <>Now at world select page, coming soon</>,
+        'avatarselect': <>Now at avatar select page, coming soon</>,
     }
 
     return appMap[appPage];
