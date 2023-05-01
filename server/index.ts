@@ -269,6 +269,7 @@ app.delete(
 
       if (queryRes.rows.length !== 1) {
         res.status(500).send({ message: 'No existing world found for those parameters' })
+        return
       }
     } catch (err: any) {
       console.log(err.stack)
