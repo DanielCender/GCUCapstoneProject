@@ -27,12 +27,18 @@ const StyledMenuBar = styled('div')`
   }
 `
 
-const HomeTitle = styled('h1')`
+const HomeTitle = styled('button')`
   font-family: Ariel, sans-serif;
   font-weight: 400;
   font-style: italic;
   color: ${PALETTE['Non Photo blue']};
   text-shadow: 2px 2px 5px ${PALETTE['Sunset']};
+  outline: none;
+  background: none;
+  border: none;
+  height: 80px;
+  font-size: 3rem;
+  cursor: pointer;
 `
 
 const StyledButtonGroup = styled('div')`
@@ -78,7 +84,9 @@ const PageWrapper: FunctionComponent<PropsWithChildren> = ({ children }) => {
     <PageContainer>
       <StyledMenuBar>
         <div>{/* Empty div for alignment */}</div>
-        <HomeTitle>Little Offices</HomeTitle>
+        <HomeTitle component="button" variant="h1" onClick={() => setCurrentPage('home')}>
+          Little Offices
+        </HomeTitle>
         <StyledButtonGroup>
           {!authenticated ? (
             <HeaderButton variant="contained" onClick={() => setCurrentPage('login')}>
