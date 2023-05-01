@@ -84,7 +84,7 @@ const PageWrapper: FunctionComponent<PropsWithChildren> = ({ children }) => {
     <PageContainer>
       <StyledMenuBar>
         <div>{/* Empty div for alignment */}</div>
-        <HomeTitle component="button" variant="h1" onClick={() => setCurrentPage('home')}>
+        <HomeTitle type="button" onClick={() => setCurrentPage('home')}>
           Little Offices
         </HomeTitle>
         <StyledButtonGroup>
