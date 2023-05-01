@@ -74,6 +74,7 @@ export const Login = () => {
         headers: {
           'Content-Type': 'application/json',
         },
+        // credentials: 'include',
         body: JSON.stringify(data),
       })
 
@@ -85,6 +86,9 @@ export const Login = () => {
       }
 
       console.log('Response:', result)
+      if (result.userId) {
+        localStorage.setItem('userId', result.userId)
+      }
       setCurrentPage('worldselect')
     } catch (error) {
       console.error('Error:', error)

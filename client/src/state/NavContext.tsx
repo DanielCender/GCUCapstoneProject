@@ -1,30 +1,37 @@
-import { useContext, createContext, PropsWithChildren, useState, SetStateAction } from 'react';
+import { useContext, createContext, PropsWithChildren, useState, SetStateAction } from 'react'
 
-export type AppPage = 'home' | 'signup' | 'login' | 'worldselect' | 'avatarselect';
+export type AppPage = 'home' | 'signup' | 'login' | 'worldselect' | 'avatarselect' | 'worldscene'
 
 export type NavContextFields = {
-    currentPage: AppPage;
-    setCurrentPage: React.Dispatch<SetStateAction<AppPage>>;
+  currentPage: AppPage
+  setCurrentPage: React.Dispatch<SetStateAction<AppPage>>
 }
 
 const defaultUserContext: NavContextFields = {
-    currentPage: 'home',
-    setCurrentPage: () => {}
+  currentPage: 'home',
+  setCurrentPage: () => {},
 }
 
-export const NavContext = createContext<NavContextFields>(defaultUserContext);
+export const NavContext = createContext<NavContextFields>(defaultUserContext)
 
 export const NavContextProvider: React.FunctionComponent<PropsWithChildren> = ({ children }) => {
-    const [currentPage, setCurrentPage] = useState<AppPage>(defaultUserContext.currentPage);
+  // takes terminating route from the URL. Only supports one level deep, no nested routes
+  const startingPage = location.href.slice(location.href.lastIndexOf('/') + 1) ?? null
 
-    return (
-        <NavContext.Provider value={{
-            currentPage,
-            setCurrentPage,
-        }}>
-            {children}
-        </NavContext.Provider>
-    )
+  const [currentPage, setCurrentPage] = useState<AppPage>(
+    (startingPage as AppPage) ?? defaultUserContext.currentPage
+  )
+
+  return (
+    <NavContext.Provider
+      value={{
+        currentPage,
+        setCurrentPage,
+      }}
+    >
+      {children}
+    </NavContext.Provider>
+  )
 }
 
-export const useNavContext = () => useContext(NavContext);
+export const useNavContext = () => useContext(NavContext)
