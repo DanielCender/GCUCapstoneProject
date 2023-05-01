@@ -1,10 +1,9 @@
-import { FunctionComponent, useState, SyntheticEvent, SetStateAction } from 'react'
+import { FunctionComponent, useState, SyntheticEvent } from 'react'
 import { PageWrapper } from '../components/PageWrapper'
 import { styled } from '@mui/system'
 import Button from '@mui/material/Button'
 import Tabs from '@mui/material/Tabs'
 import Tab from '@mui/material/Tab'
-import FormGroup from '@mui/material/FormGroup'
 import Alert from '@mui/material/Alert'
 import Box from '@mui/material/Box'
 import AlertTitle from '@mui/material/AlertTitle'
@@ -12,7 +11,6 @@ import TextField from '@mui/material/TextField'
 import Stack from '@mui/material/Stack'
 import Typography from '@mui/material/Typography'
 import Grid from '@mui/material/Grid'
-import { useNavContext } from '../state/NavContext'
 import { PALETTE } from '../palette'
 
 const formHeight = 400
@@ -50,18 +48,6 @@ const JoinFormWrapper = styled(Grid)`
   margin-right: auto;
   /* background-color: ${(props: any) => props.theme.palette.primary.main};
   border-radius: 25px; */
-`
-
-const FormRow = styled('div')`
-  display: flex;
-  justify-content: center;
-  flex-direction: row;
-  /* margin-left: auto; */
-  /* margin-right: auto; */
-  /* padding: 10px 25px; */
-  /* background-color: ${(props: any) => props.theme.palette.primary.main};
-  border-radius: 25px; */
-  /* margin: 2rem 2rem; */
 `
 
 const LoginHeader = styled('h2')`
@@ -223,8 +209,6 @@ const WorldCreateForm: FunctionComponent<{ returnToWorldList: VoidFunction }> = 
 }
 
 const JoinWorldForm = () => {
-  const { setCurrentPage } = useNavContext()
-
   const [worldId, setWorldId] = useState<string>('')
   const [worldPassword, setWorldPassword] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -238,10 +222,10 @@ const JoinWorldForm = () => {
       return
     }
 
-    const data = {
-      worldId,
-      worldPassword,
-    }
+    // const data = {
+    //   worldId,
+    //   worldPassword,
+    // }
 
     // todo: Write handler to make WebSocket connection to server for this World ID
 
@@ -337,7 +321,7 @@ const WorldManagementForm = () => {
 export const WorldSelect = () => {
   const [value, setValue] = useState(0)
 
-  const handleChange = (event: SyntheticEvent, newValue: number) => {
+  const handleChange = (_event: SyntheticEvent, newValue: number) => {
     setValue(newValue)
   }
 
