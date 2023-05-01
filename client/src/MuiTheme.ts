@@ -1,13 +1,20 @@
 import { createTheme } from '@mui/material/styles'
+import { PALETTE } from './palette'
 
 export const muiTheme = createTheme({
   palette: {
     mode: 'dark',
     primary: {
-      main: '#426dea',
+      main: PALETTE['Russian violet'],
     },
     secondary: {
-      main: '#42eacb',
+      main: PALETTE['Raspberry rose'],
+    },
+    info: {
+      main: PALETTE.Sunset,
+    },
+    error: {
+      main: PALETTE.Bittersweet,
     },
   },
 })
