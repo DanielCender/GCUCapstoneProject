@@ -1,16 +1,16 @@
 {
-    "compilerOptions": {
-      "outDir": "lib",
-      "target": "es6",
-      "module": "commonjs",
-      "strict": true,
-      "allowJs": true,
-      "strictNullChecks": false,
-      "esModuleInterop": true,
-      "experimentalDecorators": true,
-      "skipLibCheck": true,
-      "forceConsistentCasingInFileNames": true
-    },
-    "include": ["."]
-  }
-  
+  "compilerOptions": {
+    "outDir": "lib",
+    "target": "es6",
+    "module": "commonjs",
+    "strict": true,
+    "allowJs": true,
+    "strictNullChecks": false,
+    "esModuleInterop": true,
+    "experimentalDecorators": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "typeRoots": ["./custom.d.ts", "./node_modules/@types"]
+  },
+  "include": ["."]
+}

@@ -1,5 +1,3 @@
-// ('henry', 'pam', 'alexandra', 'bill', 'hermione', 'harry')
-
 export const USER_AVATAR_OPTIONS = [
   'henry',
   'pam',
