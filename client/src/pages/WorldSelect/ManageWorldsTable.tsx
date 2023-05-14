@@ -3,6 +3,7 @@ import { styled } from '@mui/system'
 import CircularProgress from '@mui/material/CircularProgress'
 import Alert from '@mui/material/Alert'
 import { PALETTE } from '../../palette'
+import { useUserContext } from '../../state/UserContext'
 
 const SelectWorldWrapper = styled('div')`
   position: relative;
@@ -19,13 +20,17 @@ const PanelHeader = styled('h2')`
   text-shadow: 2px 2px 5px ${PALETTE['Sunset']};
 `
 
-const fetcher = (url: string) => fetch(url).then((res) => res.json())
-
 export const ManageWorldsTable = () => {
+  const { authHeaders } = useUserContext()
+  const fetcher = (url: string) =>
+    fetch(url, {
+      headers: {
+        ...authHeaders,
+      },
+    }).then((res) => res.json())
+
   const { data, error, isLoading } = useSWR(
-    `${import.meta.env.VITE_LITTLE_OFFICES_SERVER_URL}/users/${localStorage.getItem(
-      'userId'
-    )}/worlds`,
+    `${import.meta.env.VITE_LITTLE_OFFICES_SERVER_URL}/worlds`,
     fetcher
   )
 

@@ -1,23 +1,15 @@
-import express from 'express'
+import express, { Request } from 'express'
 import { db } from '../boundaries/db'
+import { authenticateToken } from '../middleware'
 
 const userDataRouter = express.Router()
 
 userDataRouter.post(
-  '/users/:userId/worlds',
-  async (
-    req: {
-      cookies: any
-      params: { userId: string }
-      body: { worldname: string; worldpassword: string }
-    },
-    res
-  ) => {
-    console.log('req.body', req.body)
-    console.log('req.params', req.params)
-
+  '/worlds',
+  authenticateToken,
+  async (req: Request<{}, {}, { worldname: string; worldpassword: string }>, res) => {
+    const { authedUserId } = req
     const { worldname, worldpassword } = req.body
-    const { userId } = req.params
 
     // validation
     if (!worldname || worldname.length < 6) {
@@ -35,7 +27,7 @@ userDataRouter.post(
     // Check for any matching usernames
     try {
       const worldnameCheckQuery = 'SELECT * FROM worlds WHERE name LIKE $1 AND ownerId = $2'
-      const worldnameCheckValues = [`%${worldname}%`, userId]
+      const worldnameCheckValues = [`%${worldname}%`, authedUserId]
       const queryRes = await db.query(worldnameCheckQuery, worldnameCheckValues)
 
       if (queryRes.rows.length > 0) {
@@ -50,7 +42,7 @@ userDataRouter.post(
 
     const worldInsertQuery =
       'INSERT INTO worlds(name, password, ownerId) VALUES($1, $2, $3) RETURNING *'
-    const worldInsertValues = [worldname, worldpassword, userId]
+    const worldInsertValues = [worldname, worldpassword, authedUserId]
     try {
       const worldCreateRes = await db.query(worldInsertQuery, worldInsertValues)
       console.log(worldCreateRes.rows[0])
@@ -65,36 +57,32 @@ userDataRouter.post(
   }
 )
 
-userDataRouter.get(
-  '/users/:userId/worlds',
-  async (req: { cookies: any; params: { userId: string } }, res) => {
-    const { userId } = req.params
-    // Check for any matching usernames
-    try {
-      const worldQuery = 'SELECT * FROM worlds WHERE ownerId = $1'
-      const worldQueryValues = [userId]
-      const queryRes = await db.query(worldQuery, worldQueryValues)
+userDataRouter.get('/worlds', authenticateToken, async (req: Request, res) => {
+  const { authedUserId } = req
+  try {
+    const worldQuery = 'SELECT * FROM worlds WHERE ownerId = $1'
+    const worldQueryValues = [authedUserId]
+    const queryRes = await db.query(worldQuery, worldQueryValues)
 
-      res.status(200).send(queryRes.rows)
-    } catch (err: any) {
-      console.log(err.stack)
-      res.status(500).send({ message: 'Server error encountered' })
-      return
-    }
+    res.status(200).send(queryRes.rows)
+  } catch (err: any) {
+    console.log(err.stack)
+    res.status(500).send({ message: 'Server error encountered' })
+    return
   }
-)
+})
 
 userDataRouter.delete(
-  '/users/:userId/worlds/:worldId',
-  async (req: { cookies: any; params: { userId: string; worldId: string } }, res) => {
-    console.log('req.params', req.params)
-
-    const { userId, worldId } = req.params
+  '/worlds/:worldId',
+  authenticateToken,
+  async (req: Request<{ worldId: string }>, res) => {
+    const { authedUserId } = req
+    const { worldId } = req.params
 
     // Check for any matching worlds by these params
     try {
       const worldQuery = 'SELECT * FROM worlds WHERE ownerId = $1 AND id = $2'
-      const worldQueryValues = [userId, worldId]
+      const worldQueryValues = [authedUserId, worldId]
       const queryRes = await db.query(worldQuery, worldQueryValues)
 
       if (queryRes.rows.length !== 1) {

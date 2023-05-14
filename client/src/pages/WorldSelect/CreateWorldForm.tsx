@@ -63,25 +63,15 @@ export const WorldCreateForm: FunctionComponent<{ returnToWorldList: VoidFunctio
       worldname,
       worldPassword,
     }
-    console.log(
-      'requesting from: ',
-      `${import.meta.env.VITE_LITTLE_OFFICES_SERVER_URL}/users/${localStorage.getItem(
-        'userId'
-      )}/worlds`
-    )
+
     try {
-      const response = await fetch(
-        `${import.meta.env.VITE_LITTLE_OFFICES_SERVER_URL}/users/${localStorage.getItem(
-          'userId'
-        )}/worlds`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(data),
-        }
-      )
+      const response = await fetch(`${import.meta.env.VITE_LITTLE_OFFICES_SERVER_URL}/worlds`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      })
 
       const result = await response.json()
 

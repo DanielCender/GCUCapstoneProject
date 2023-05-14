@@ -8,6 +8,7 @@ import Stack from '@mui/material/Stack'
 import { PageWrapper } from '../components/PageWrapper'
 import { useNavContext } from '../state/NavContext'
 import { PALETTE } from '../palette'
+import { useUserContext } from '../state/UserContext'
 
 const formHeight = 400
 
@@ -45,6 +46,7 @@ const ButtonRow = styled(Stack)`
 
 export const Login = () => {
   const { setCurrentPage } = useNavContext()
+  const { setAuthToken } = useUserContext()
 
   const [username, setUsername] = useState<string>('')
   const [password, setPassword] = useState<string>('')
@@ -86,8 +88,9 @@ export const Login = () => {
       }
 
       console.log('Response:', result)
-      if (result.userId) {
-        localStorage.setItem('userId', result.userId)
+      if (result.token) {
+        setAuthToken(result.token)
+        // localStorage.setItem('authToken', result.token)
       }
       setCurrentPage('worldselect')
     } catch (error) {
