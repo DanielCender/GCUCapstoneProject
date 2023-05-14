@@ -1,10 +1,9 @@
 import { FunctionComponent, PropsWithChildren } from 'react'
 import { styled } from '@mui/system'
 import Button from '@mui/material/Button'
-import heroImage from '../assets/dylan-nolte-home-hero.jpg'
-import { useUserContext } from '../state/UserContext'
-import { useNavContext } from '../state/NavContext'
-import { PALETTE } from '../palette'
+import { useUserContext } from '../../state/UserContext'
+import { useNavContext } from '../../state/NavContext'
+import { PALETTE } from '../../palette'
 
 const headerHeight = 80
 const footerHeight = 80
@@ -58,13 +57,6 @@ const PageContents = styled('div')`
   flex-direction: column;
 `
 
-const HeroImage = styled('img')`
-  width: 100%;
-  max-width: 100%;
-  height: 350px;
-  object-fit: cover;
-`
-
 const Footer = styled('footer')`
   height: ${footerHeight}px;
   display: flex;
@@ -77,7 +69,7 @@ const Footer = styled('footer')`
   align-items: center;
 `
 
-const PageWrapper: FunctionComponent<PropsWithChildren> = ({ children }) => {
+const SceneWrapper: FunctionComponent<PropsWithChildren> = ({ children }) => {
   const { authenticated } = useUserContext()
   const { setCurrentPage } = useNavContext()
   return (
@@ -112,10 +104,7 @@ const PageWrapper: FunctionComponent<PropsWithChildren> = ({ children }) => {
           </HeaderButton>
         </StyledButtonGroup>
       </StyledMenuBar>
-      <PageContents>
-        <HeroImage src={heroImage} alt="Office Hero Image; Photo by Dylan Nolte on Unsplash" />
-        {children}
-      </PageContents>
+      <PageContents>{children}</PageContents>
       <Footer>
         <div style={{ marginLeft: '28px' }}>
           Copyright by Daniel Cender {new Date().getFullYear()}
@@ -133,4 +122,4 @@ const PageWrapper: FunctionComponent<PropsWithChildren> = ({ children }) => {
   )
 }
 
-export { PageWrapper }
+export { SceneWrapper }
