@@ -3,8 +3,9 @@ import { messageReducer } from './helpers/messageReducer'
 import { parseBufferToMessage } from './helpers/parseMessage'
 
 class AbstractWebSocketServer {
-  protected server: WebSocket.Server
+  public server: WebSocket.Server
   public port: number
+  public clients: Record<string, Set<WebSocket>>
 
   constructor(port: number) {
     this.server = new WebSocket.Server({ port })
@@ -40,14 +41,17 @@ class WebSocketServer extends AbstractWebSocketServer {
     const msg = parseBufferToMessage(message)
 
     console.log(`Received message from socket: ${JSON.stringify(msg)}`)
-    const resultStatus = await messageReducer(msg)
-    console.info('Processed message with result: ', JSON.stringify(resultStatus))
+    const resultMessage = await messageReducer(msg)
+    console.info(
+      'Processed message. Sending to all clients with result: ',
+      JSON.stringify(resultMessage)
+    )
 
     // Send a response back to the client
     // socket.clients.forEach(client => client.send)
     socket.send(`Received your message: ${message}`)
 
-    this.server.clients.forEach((client) => client.send(`Message publish`))
+    this.server.clients.forEach((client) => client.send(resultMessage))
   }
 
   handleClose(socket: WebSocket, code: number, reason: string) {

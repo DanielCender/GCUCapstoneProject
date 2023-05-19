@@ -1,24 +1,24 @@
-import express from 'express'
+import express, { Request } from 'express'
+import { Contracts } from '../../types/Contracts'
 import { db } from '../boundaries/db'
+import { authenticateToken } from '../middleware'
+import { worldStateObj } from '../state/worldStateObj'
 
 const worldDataRouter = express.Router()
 
 worldDataRouter.post(
-  '/users/:userId/worlds',
+  '/worlds',
   authenticateToken,
   async (
-    req: {
-      cookies: any
-      params: { userId: string }
-      body: { worldname: string; worldpassword: string }
-    },
+    req: Request<
+      {},
+      { message: string; name?: string },
+      { worldname: string; worldpassword: string }
+    >,
     res
   ) => {
-    console.log('req.body', req.body)
-    console.log('req.params', req.params)
-
+    const { authedUserId } = req
     const { worldname, worldpassword } = req.body
-    const { userId } = req.params
 
     // validation
     if (!worldname || worldname.length < 6) {
@@ -36,7 +36,7 @@ worldDataRouter.post(
     // Check for any matching usernames
     try {
       const worldnameCheckQuery = 'SELECT * FROM worlds WHERE name LIKE $1 AND ownerId = $2'
-      const worldnameCheckValues = [`%${worldname}%`, userId]
+      const worldnameCheckValues = [`%${worldname}%`, authedUserId]
       const queryRes = await db.query(worldnameCheckQuery, worldnameCheckValues)
 
       if (queryRes.rows.length > 0) {
@@ -51,10 +51,9 @@ worldDataRouter.post(
 
     const worldInsertQuery =
       'INSERT INTO worlds(name, password, ownerId) VALUES($1, $2, $3) RETURNING *'
-    const worldInsertValues = [worldname, worldpassword, userId]
+    const worldInsertValues = [worldname, worldpassword, authedUserId]
     try {
       const worldCreateRes = await db.query(worldInsertQuery, worldInsertValues)
-      console.log(worldCreateRes.rows[0])
       if (worldCreateRes.rows[0].name === worldname) {
         res.status(200).send({ message: 'World created!', name: worldname })
       } else {
@@ -66,36 +65,125 @@ worldDataRouter.post(
   }
 )
 
-worldDataRouter.get(
-  '/users/:userId/worlds',
-  async (req: { cookies: any; params: { userId: string } }, res) => {
-    const { userId } = req.params
-    // Check for any matching usernames
-    try {
-      const worldQuery = 'SELECT * FROM worlds WHERE ownerId = $1'
-      const worldQueryValues = [userId]
-      const queryRes = await db.query(worldQuery, worldQueryValues)
+worldDataRouter.post(
+  '/worlds/join',
+  authenticateToken,
+  async (
+    req: Request<
+      {},
+      { message: string; worldId?: string },
+      { worldId: string; worldPassword?: string }
+    >,
+    res
+  ) => {
+    const { authedUserId } = req
+    const { worldId, worldPassword } = req.body
 
-      res.status(200).send(queryRes.rows)
+    // validation
+    if (!worldId) {
+      res.status(422).send({ message: 'Need to specify a world ID to join' })
+      return
+    }
+
+    // Check for any matching worlds, including password
+    try {
+      const worldCheckQuery = 'SELECT * FROM worlds WHERE id = $1'
+      const worldCheckValues = [worldId]
+      const queryRes = await db.query(worldCheckQuery, worldCheckValues)
+      console.log('query res: ', JSON.stringify(queryRes))
+      if (queryRes.rows.length !== 1) {
+        res.status(422).send({ message: 'Cannot find a world with that ID, sorry!' })
+        return
+      }
+
+      if (queryRes.rows[0]?.password) {
+        if (worldPassword !== queryRes.rows[0]?.password) {
+          res.status(422).send({ message: 'Invalid world passcode!' })
+          return
+        }
+      }
     } catch (err: any) {
       console.log(err.stack)
       res.status(500).send({ message: 'Server error encountered' })
+      return
+    }
+
+    // Prep world state to include this world and
+    if (worldStateObj[worldId]) {
+      worldStateObj[worldId].connectedUsers.add(authedUserId)
+    } else {
+      worldStateObj[worldId] = {
+        connectedUsers: new Set([authedUserId]),
+        lastMessageSent: Date.now(),
+      }
+    }
+    res.status(200).send({ message: 'Successfully connected to world state!', worldId })
+  }
+)
+
+worldDataRouter.get(
+  '/worlds',
+  authenticateToken,
+  async (req: Request<{}, Contracts.GetWorlds.GetWorldsResponse>, res) => {
+    const { authedUserId } = req
+    try {
+      // * Get owned worlds
+      const worldQuery =
+        'SELECT worlds.id as worldId, worlds.name as worldName, worlds."password", users.id as ownerId, users.username as ownerName FROM worlds JOIN users ON worlds.ownerId = users.id WHERE ownerId = $1'
+      const worldQueryValues = [authedUserId]
+      const queryRes = await db.query(worldQuery, worldQueryValues)
+
+      console.log('query res: ', JSON.stringify(queryRes.rows, null, 2))
+      const ownedWorlds: Contracts.GetWorlds.GetWorldsResponse = queryRes.rows.map((row) => ({
+        id: row.worldid,
+        worldName: row.worldname,
+        worldHasPassword: !!row.password,
+        ownerId: row.ownerid,
+        ownerName: row.ownername,
+      }))
+
+      // * Get attended worlds
+      const worldUsersQuery =
+        'SELECT worldusers.worldId from worldusers where worldusers.userId = $1'
+      const worldUsersQueryValues = [authedUserId]
+      const worldUsersQueryRes = await db.query(worldUsersQuery, worldUsersQueryValues)
+
+      const attendedWorldsQuery =
+        'SELECT worlds.id as worldId, worlds.name as worldName, worlds."password", users.id as ownerId, users.username as ownerName FROM worlds JOIN users ON worlds.ownerId = users.id WHERE worlds.id = ANY($1::int[])'
+      const attendedWorldsQueryValues = [worldUsersQueryRes.rows.map((row) => row.worldId)]
+      const attendedWorldsQueryRes = await db.query(attendedWorldsQuery, attendedWorldsQueryValues)
+
+      const attendedWorlds: Contracts.GetWorlds.GetWorldsResponse = attendedWorldsQueryRes.rows.map(
+        (row) => ({
+          id: row.worldid,
+          worldName: row.worldname,
+          worldHasPassword: !!row.password,
+          ownerId: row.ownerid,
+          ownerName: row.ownername,
+        })
+      )
+
+      res.status(200).send([...ownedWorlds, ...attendedWorlds])
+    } catch (err: any) {
+      console.log(err.stack)
+      res.status(500).send([])
       return
     }
   }
 )
 
 worldDataRouter.delete(
-  '/users/:userId/worlds/:worldId',
-  async (req: { cookies: any; params: { userId: string; worldId: string } }, res) => {
-    console.log('req.params', req.params)
-
-    const { userId, worldId } = req.params
+  '/worlds/:worldId',
+  authenticateToken,
+  async (req: Request<{ worldId: string }>, res) => {
+    const { authedUserId } = req
+    const { worldId } = req.params
 
     // Check for any matching worlds by these params
     try {
-      const worldQuery = 'SELECT * FROM worlds WHERE ownerId = $1 AND id = $2'
-      const worldQueryValues = [userId, worldId]
+      const worldQuery =
+        'SELECT * FROM worlds JOIN users ON worlds.ownerId = users.id WHERE worlds.ownerId = $1 AND worlds.id = $2'
+      const worldQueryValues = [authedUserId, worldId]
       const queryRes = await db.query(worldQuery, worldQueryValues)
 
       if (queryRes.rows.length !== 1) {

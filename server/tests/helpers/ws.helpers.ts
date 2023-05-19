@@ -1,8 +1,9 @@
 import WebSocket from 'ws'
-import { WebSocketServer } from './../boundaries/../../boundaries/websockets'
+import { WebSocketServer } from '../../boundaries/websockets'
 
+// todo: Unused, hope is to use this for testing websocket message handling logicf
 function startServer(callback: VoidFunction) {
-  const server = new WebSocketServer(8080)
+  const { server } = new WebSocketServer(8080)
 
   server.on('listening', () => {
     callback()

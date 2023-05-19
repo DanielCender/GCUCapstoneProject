@@ -1,2 +1,2 @@
 export * from './auth'
-export * from './userData'
+export * from './world'

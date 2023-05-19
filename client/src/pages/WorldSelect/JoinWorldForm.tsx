@@ -7,6 +7,8 @@ import Alert from '@mui/material/Alert'
 import Stack from '@mui/material/Stack'
 import Grid from '@mui/material/Grid'
 import { PALETTE } from '../../palette'
+import { useNavContext } from '../../state/NavContext'
+import { useUserContext } from '../../state/UserContext'
 
 const JoinFormWrapper = styled(Grid)`
   position: relative;
@@ -35,6 +37,8 @@ const ButtonRow = styled(Stack)`
 `
 
 export const JoinWorldForm = () => {
+  const { setCurrentPage } = useNavContext()
+  const { authHeaders } = useUserContext()
   const [worldId, setWorldId] = useState<string>('')
   const [worldPassword, setWorldPassword] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -48,38 +52,38 @@ export const JoinWorldForm = () => {
       return
     }
 
-    // const data = {
-    //   worldId,
-    //   worldPassword,
-    // }
+    const data = {
+      worldId,
+      worldPassword,
+    }
 
-    // todo: Write handler to make WebSocket connection to server for this World ID
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_LITTLE_OFFICES_SERVER_URL}/worlds/join`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            ...authHeaders,
+          },
+          body: JSON.stringify(data),
+        }
+      )
 
-    // try {
-    //   const response = await fetch(`${import.meta.env.VITE_LITTLE_OFFICES_SERVER_URL}/joinWorld`, {
-    //     method: 'POST',
-    //     headers: {
-    //       'Content-Type': 'application/json',
-    //     },
-    //     // credentials: 'include',
-    //     body: JSON.stringify(data),
-    //   })
+      const result = await response.json()
 
-    //   const result = await response.json()
+      if (response.status !== 200) {
+        setError(result.message)
+        return
+      }
 
-    //   if (response.status !== 200) {
-    //     setError(result.message)
-    //     return
-    //   }
-
-    //   console.log('Response:', result)
-    //   if (result.userId) {
-    //     localStorage.setItem('userId', result.userId)
-    //   }
-    //   setCurrentPage('worldselect')
-    // } catch (error) {
-    //   console.error('Error:', error)
-    // }
+      if (result.worldId) {
+        localStorage.setItem('worldId', result.worldId)
+        setCurrentPage('worldscene')
+      }
+    } catch (error) {
+      console.error('Error:', error)
+    }
   }
 
   return (
@@ -100,7 +104,6 @@ export const JoinWorldForm = () => {
           <TextField
             label="World Password (opt)"
             onChange={(e: any) => setWorldPassword(e.target.value)}
-            required
             variant="outlined"
             color="secondary"
             type="password"

@@ -1,5 +1,6 @@
 {
   "extends": "../tsconfig.server.json",
   "compilerOptions": { "noEmit": true },
-  "include": ["**/*.ts"]
+  "include": ["**/*.ts"],
+  "types": ["@types/jest", "node"]
 }

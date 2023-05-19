@@ -70,7 +70,7 @@ const Footer = styled('footer')`
 `
 
 const SceneWrapper: FunctionComponent<PropsWithChildren> = ({ children }) => {
-  const { authenticated } = useUserContext()
+  const { authenticated, logout } = useUserContext()
   const { setCurrentPage } = useNavContext()
   return (
     <PageContainer>
@@ -88,8 +88,7 @@ const SceneWrapper: FunctionComponent<PropsWithChildren> = ({ children }) => {
             <HeaderButton
               variant="contained"
               onClick={() => {
-                // todo: Add logout call to Node.js server to remove cached user state
-                localStorage.removeItem('userId')
+                logout()
                 setCurrentPage('home')
               }}
             >

@@ -7,21 +7,31 @@ export enum Message {
   SEND_ROOM_DATA,
 }
 
-export type WSMessage = {
-  type: string
-  body: object // JSON body
+export interface WSMessageBody {
+  worldId: string
 }
 
-export const enum WSMessageType {
+export type WSMessage = {
+  type: string
+  body: WSMessageBody // JSON body
+}
+
+export const enum ServerSentWSMessageType {
   UserJoined = 'user-joined',
   ChatMessageSent = 'chat-message-sent',
   UserLeft = 'user-left',
 }
 
+export const enum WSMessageType {
+  JoinWorld = 'join-world',
+  LeaveWorld = 'leave-world',
+}
+
 export namespace WebSocketMessages {
   export interface UserJoinedMessage extends WSMessage {
-    type: WSMessageType.UserJoined
+    type: ServerSentWSMessageType.UserJoined
     body: {
+      worldId: string
       userId: string
       username: string
       avatar: string
@@ -29,16 +39,18 @@ export namespace WebSocketMessages {
   }
 
   export interface UserLeftMessage extends WSMessage {
-    type: WSMessageType.UserLeft
+    type: ServerSentWSMessageType.UserLeft
     body: {
+      worldId: string
       userId: string
       username: string
     }
   }
 
   export interface ChatMessageSentMessage extends WSMessage {
-    type: WSMessageType.ChatMessageSent
+    type: ServerSentWSMessageType.ChatMessageSent
     body: {
+      worldId: string
       userId: string
       username: string
       avatar: string

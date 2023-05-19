@@ -1,4 +1,5 @@
-import { WebSocketMessages, WSMessage, WSMessageType } from '../../../types/Messages'
+import { WebSocketMessages, WSMessage, ServerSentWSMessageType } from '../../../types/Messages'
+import { worldStateObj, removeUserFromWorldState } from '../../state/worldStateObj'
 import { db } from '../db'
 
 export type MessageProcessingResultStatus = {
@@ -8,15 +9,17 @@ export type MessageProcessingResultStatus = {
 
 const messageReducer = async (message: WSMessage): Promise<MessageProcessingResultStatus> => {
   switch (message.type) {
-    case WSMessageType.UserJoined: {
-      // todo: handle user joined, create world user
+    case ServerSentWSMessageType.UserJoined: {
+      const { worldId, userId } = (message as WebSocketMessages.UserJoinedMessage).body
+      removeUserFromWorldState(worldId, userId)
       break
     }
-    case WSMessageType.UserLeft: {
-      // todo: handle user left, remove from server state
+    case ServerSentWSMessageType.UserLeft: {
+      const { worldId, userId } = (message as WebSocketMessages.UserLeftMessage).body
+      removeUserFromWorldState(worldId, userId)
       break
     }
-    case WSMessageType.ChatMessageSent: {
+    case ServerSentWSMessageType.ChatMessageSent: {
       // todo: Create new worldMessage record in db, publish message to clients
       break
     }

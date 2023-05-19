@@ -13,7 +13,7 @@ export const createSocketConnection = () => {
     console.log(`Received message: ${event.data}`)
 
     // Close the connection after receiving a message
-    // socket.close()
+    socket.close()
   }
 
   const handleOnCloseSocket = (event: WebSocketEventMap['close']) => {

@@ -1,5 +1,5 @@
 module.exports = {
-  extends: '../.eslintrc.js',
+  extends: ['../.eslintrc.js', 'plugin:jest/recommended'],
   globals: {
     jest: 'readonly',
     expect: 'readonly',
@@ -15,7 +15,11 @@ module.exports = {
     project: 'tsconfig.json',
     tsconfigRootDir: __dirname,
   },
+  plugins: ['jest'],
   rules: {
     '@typescript-eslint/no-unsafe-assignment': 'off',
+    rules: {
+      semi: ['error', 'never'], // Disable semicolon rule
+    },
   },
 }
