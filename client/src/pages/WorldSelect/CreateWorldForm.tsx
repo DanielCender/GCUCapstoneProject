@@ -6,6 +6,7 @@ import TextField from '@mui/material/TextField'
 import Stack from '@mui/material/Stack'
 import Alert from '@mui/material/Alert'
 import { PALETTE } from '../../palette'
+import { useUserContext } from '../../state/UserContext'
 
 const formHeight = 400
 const FormModal = styled('div')`
@@ -36,6 +37,7 @@ const ButtonRow = styled(Stack)`
 export const WorldCreateForm: FunctionComponent<{ returnToWorldList: VoidFunction }> = ({
   returnToWorldList,
 }) => {
+  const { authHeaders } = useUserContext()
   const [worldname, setWorldname] = useState<string>('')
   const [worldPassword, setWorldPassword] = useState<string | null>(null)
   const [worldPasswordConfirmation, setWorldPasswordConfirmation] = useState<string | null>(null)
@@ -69,6 +71,7 @@ export const WorldCreateForm: FunctionComponent<{ returnToWorldList: VoidFunctio
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          ...authHeaders,
         },
         body: JSON.stringify(data),
       })

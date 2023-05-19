@@ -11,6 +11,7 @@ import { useWebSocketConnection } from '../hooks/index'
 import { SceneWrapper } from '../components/Scene/SceneWrapper'
 import { ChatBox } from '../components/Scene/ChatBoxAlt'
 import CommentBox from '../components/Scene/ChatMessageBox'
+import { WebSocketContextProvider } from '../state/WebSocketContext'
 
 const SceneContainer = styled('div')`
   display: flex;
@@ -29,15 +30,17 @@ const WorldScene = () => {
 
   // return <>World Scene</>
   return (
-    <SceneWrapper>
-      <SceneContainer>
-        <div style={{ height: 200, width: 500, border: '1px solid red' }}>
-          Voice Chat Indicators
-        </div>
-        <CommentBox />
-        {/* <ChatBox /> */}
-      </SceneContainer>
-    </SceneWrapper>
+    <WebSocketContextProvider>
+      <SceneWrapper>
+        <SceneContainer>
+          <div style={{ height: 200, width: 500, border: '1px solid red' }}>
+            Voice Chat Indicators
+          </div>
+          <CommentBox />
+          {/* <ChatBox /> */}
+        </SceneContainer>
+      </SceneWrapper>
+    </WebSocketContextProvider>
   )
 }
 

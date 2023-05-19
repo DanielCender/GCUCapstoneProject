@@ -1,16 +1,7 @@
-export const USER_AVATAR_OPTIONS = [
-  'henry',
-  'pam',
-  'alexandra',
-  'bill',
-  'hermione',
-  'harry',
-] as const
-
-export type UserAvatar = typeof USER_AVATAR_OPTIONS[number]
+import { UserAvatar } from './constants'
 
 // * Common fields on all models
-interface IModel {
+export interface IModel {
   id: string
 }
 
@@ -29,6 +20,7 @@ export namespace Models {
     text: string
     worldId: string
     authorId: string
+    created_at: string
   }
   export interface WorldUser extends IModel {
     userId: string

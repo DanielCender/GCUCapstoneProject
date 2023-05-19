@@ -1,8 +1,6 @@
 import { useContext, createContext, PropsWithChildren, useMemo, useState } from 'react'
 import { JWTTokenPayload } from '../../../types/Auth'
 
-// const AUTH_COOKIE = 'littleOfficesAuth'
-
 const jwtDecode = (t: string): { raw: string; header: object; payload: JWTTokenPayload } => {
   return {
     raw: t,
@@ -14,6 +12,8 @@ const jwtDecode = (t: string): { raw: string; header: object; payload: JWTTokenP
 export type UserContextFields = {
   authenticated: boolean
   userId: string | null
+  username: string | null
+  logout: () => void
   setAuthToken: (token: string) => void
   authHeaders: {
     Authorization: string
@@ -23,6 +23,8 @@ export type UserContextFields = {
 const defaultUserContext: UserContextFields = {
   authenticated: false,
   userId: null,
+  username: null,
+  logout: () => {},
   setAuthToken: (_: string) => {},
   authHeaders: {
     Authorization: 'Bearer ',
@@ -36,22 +38,22 @@ export const UserContextProvider: React.FunctionComponent<PropsWithChildren> = (
   const [jwt, setJwt] = useState<string>(localStorage.getItem('authToken') ?? '')
 
   const userAuthInfo = useMemo(() => {
-    let authInfo: Pick<UserContextFields, 'authHeaders' | 'userId'> = {
+    let authInfo: Pick<UserContextFields, 'authHeaders' | 'userId' | 'username'> = {
       authHeaders: {
         Authorization: `Bearer ${jwt}`,
       },
       userId: null,
+      username: null,
     }
 
     if (jwt) {
       const parsedToken = jwtDecode(jwt)
       authInfo.userId = parsedToken.payload.userId
+      authInfo.username = parsedToken.payload.username
     }
 
     return authInfo
   }, [jwt])
-
-  console.log('userAuthInfo: ', JSON.stringify(userAuthInfo))
 
   const setAuthToken = (token: string) => {
     // * Store so it's loaded on page refreshes
@@ -59,11 +61,17 @@ export const UserContextProvider: React.FunctionComponent<PropsWithChildren> = (
     setJwt(token)
   }
 
+  const logout = () => {
+    localStorage.removeItem('authToken')
+    setJwt('')
+  }
+
   return (
     <UserAuthContext.Provider
       value={{
-        authenticated: !!userAuthInfo,
+        authenticated: !!userAuthInfo.userId,
         setAuthToken,
+        logout,
         ...userAuthInfo,
       }}
     >
