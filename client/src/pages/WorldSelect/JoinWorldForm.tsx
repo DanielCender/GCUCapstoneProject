@@ -89,7 +89,7 @@ export const JoinWorldForm = () => {
   return (
     <JoinFormWrapper>
       <form autoComplete="off" onSubmit={handleSubmit}>
-        <PanelHeader>Join a Friend's World</PanelHeader>
+        <PanelHeader>Join an Existing World</PanelHeader>
         <RowStack direction="row" spacing={2}>
           <TextField
             label="World ID"

@@ -1,6 +1,8 @@
 import WebSocket from 'ws'
 import { messageReducer } from './helpers/messageReducer'
-import { parseBufferToMessage } from './helpers/parseMessage'
+import { parseBufferToMessage, parseMessageToBuffer } from './helpers/parseMessage'
+import { decodeAuthToken } from './helpers/authTokenDecode'
+import { ClientWSMessage } from '../../types/Messages'
 
 class AbstractWebSocketServer {
   public server: WebSocket.Server
@@ -38,10 +40,15 @@ class AbstractWebSocketServer {
 
 class WebSocketServer extends AbstractWebSocketServer {
   async handleMessage(socket: WebSocket, message: Buffer) {
-    const msg = parseBufferToMessage(message)
+    const msg: ClientWSMessage | null = parseBufferToMessage(message)
+    if (!msg) {
+      console.error('Could not process message, exiting...')
+    }
 
     console.log(`Received message from socket: ${JSON.stringify(msg)}`)
-    const resultMessage = await messageReducer(msg)
+    const decodedAuthHeader = await decodeAuthToken(msg.body.authJwt)
+    console.log('decoded auth header: ', decodedAuthHeader)
+    const resultMessage = await messageReducer(decodedAuthHeader.userId, msg)
     console.info(
       'Processed message. Sending to all clients with result: ',
       JSON.stringify(resultMessage)
@@ -51,7 +58,10 @@ class WebSocketServer extends AbstractWebSocketServer {
     // socket.clients.forEach(client => client.send)
     socket.send(`Received your message: ${message}`)
 
-    this.server.clients.forEach((client) => client.send(resultMessage))
+    const messageBuffer = parseMessageToBuffer(resultMessage)
+    if (messageBuffer) {
+      this.server.clients.forEach((client) => client.send(messageBuffer))
+    }
   }
 
   handleClose(socket: WebSocket, code: number, reason: string) {

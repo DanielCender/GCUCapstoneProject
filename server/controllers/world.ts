@@ -13,12 +13,12 @@ worldDataRouter.post(
     req: Request<
       {},
       { message: string; name?: string },
-      { worldname: string; worldpassword: string }
+      { worldname: string; worldPassword: string }
     >,
     res
   ) => {
     const { authedUserId } = req
-    const { worldname, worldpassword } = req.body
+    const { worldname, worldPassword } = req.body
 
     // validation
     if (!worldname || worldname.length < 6) {
@@ -28,7 +28,7 @@ worldDataRouter.post(
       return
     }
 
-    if (worldpassword && worldpassword.length < 8) {
+    if (worldPassword && worldPassword.length < 8) {
       res.status(422).send({ message: 'World password must be at least 8 characters long' })
       return
     }
@@ -51,7 +51,7 @@ worldDataRouter.post(
 
     const worldInsertQuery =
       'INSERT INTO worlds(name, password, ownerId) VALUES($1, $2, $3) RETURNING *'
-    const worldInsertValues = [worldname, worldpassword, authedUserId]
+    const worldInsertValues = [worldname, worldPassword, authedUserId]
     try {
       const worldCreateRes = await db.query(worldInsertQuery, worldInsertValues)
       if (worldCreateRes.rows[0].name === worldname) {
@@ -90,7 +90,6 @@ worldDataRouter.post(
       const worldCheckQuery = 'SELECT * FROM worlds WHERE id = $1'
       const worldCheckValues = [worldId]
       const queryRes = await db.query(worldCheckQuery, worldCheckValues)
-      console.log('query res: ', JSON.stringify(queryRes))
       if (queryRes.rows.length !== 1) {
         res.status(422).send({ message: 'Cannot find a world with that ID, sorry!' })
         return
@@ -133,7 +132,6 @@ worldDataRouter.get(
       const worldQueryValues = [authedUserId]
       const queryRes = await db.query(worldQuery, worldQueryValues)
 
-      console.log('query res: ', JSON.stringify(queryRes.rows, null, 2))
       const ownedWorlds: Contracts.GetWorlds.GetWorldsResponse = queryRes.rows.map((row) => ({
         id: row.worldid,
         worldName: row.worldname,

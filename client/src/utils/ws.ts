@@ -1,3 +1,7 @@
+/**
+ * @deprecated Use WebSocketContextProvider now
+ * @returns 
+ */
 export const createSocketConnection = () => {
   const socket = new WebSocket(`${import.meta.env.VITE_LITTLE_OFFICES_WS_SERVER_URL}`)
 
@@ -5,7 +9,7 @@ export const createSocketConnection = () => {
     console.log('Connected to WebSocket server')
     console.log('event: ', JSON.stringify(event, null, 2))
     // Send a message to the server
-    const message = { type: 'greeting', name: 'Bob' }
+    const message = { authJwt:  }
     socket.send(JSON.stringify(message))
   }
 
