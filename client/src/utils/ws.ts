@@ -1,6 +1,8 @@
+import { ClientSentWSMessageType, WebSocketMessages } from '../../../types/Messages'
+
 /**
  * @deprecated Use WebSocketContextProvider now
- * @returns 
+ * @returns
  */
 export const createSocketConnection = () => {
   const socket = new WebSocket(`${import.meta.env.VITE_LITTLE_OFFICES_WS_SERVER_URL}`)
@@ -9,7 +11,13 @@ export const createSocketConnection = () => {
     console.log('Connected to WebSocket server')
     console.log('event: ', JSON.stringify(event, null, 2))
     // Send a message to the server
-    const message = { authJwt:  }
+    const message: WebSocketMessages.JoinWorldMessage = {
+      type: ClientSentWSMessageType.JoinWorld,
+      body: {
+        authJwt: localStorage.getItem('authToken') ?? '',
+        worldId: localStorage.getItem('worldId') ?? '',
+      },
+    }
     socket.send(JSON.stringify(message))
   }
 
@@ -20,7 +28,7 @@ export const createSocketConnection = () => {
     socket.close()
   }
 
-  const handleOnCloseSocket = (event: WebSocketEventMap['close']) => {
+  const handleOnCloseSocket = (_event: WebSocketEventMap['close']) => {
     console.log('Disconnected from WebSocket server')
     socket.close()
   }

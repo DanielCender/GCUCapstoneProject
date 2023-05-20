@@ -24,7 +24,7 @@ export const WebSocketContextProvider: React.FunctionComponent<PropsWithChildren
   }
 
   const handleOnCloseSocket = (event: WebSocketEventMap['close']) => {
-    console.log('Disconnected from WebSocket server')
+    console.log('Disconnected from WebSocket server with event: ', event)
     // socket.close()
   }
 

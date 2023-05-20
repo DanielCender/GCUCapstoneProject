@@ -1,20 +1,26 @@
 import { useEffect, useState } from 'react'
 import { styled } from '@mui/system'
-import { Paper, InputBase, IconButton, Divider, List, ListItem, ListItemText } from '@mui/material'
+import {
+  Paper,
+  InputBase,
+  IconButton,
+  Divider,
+  List,
+  ListItem,
+  ListItemText,
+  Alert,
+  AlertTitle,
+} from '@mui/material'
 import SendIcon from '@mui/icons-material/Send'
 import { useUserContext } from '../../state/UserContext'
 import { useWebSocketContext } from '../../state/WebSocketContext'
-import {
-  ClientSentWSMessageType,
-  ClientWSMessage,
-  WebSocketMessages,
-} from '../../../../types/Messages'
+import { ClientSentWSMessageType, WebSocketMessages } from '../../../../types/Messages'
 
-type StylePropTypes = { theme: { spacing: (nbr: number) => any } }
+// type StylePropTypes = { theme: { spacing: (nbr: number) => any } }
 
 const CommentBoxContainer = styled(Paper)`
-  margin: ${({ theme }: StylePropTypes) => theme.spacing(2)}px;
-  padding: ${({ theme }: StylePropTypes) => theme.spacing(2)}px;
+  margin: ${({ theme }: any) => theme.spacing(2)}px;
+  padding: ${({ theme }: any) => theme.spacing(2)}px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -26,13 +32,7 @@ const CommentList = styled(List)`
   width: 100%;
   max-height: 200px;
   overflow: auto;
-  background-color: ${({
-    theme,
-  }: StylePropTypes & {
-    theme: {
-      palette: { background: { paper: string } }
-    }
-  }) => theme.palette.background.paper};
+  background-color: ${({ theme }: any) => theme.palette.background.paper};
 `
 
 const CommentItem = styled(ListItem)`
@@ -50,7 +50,7 @@ const CommentForm = styled('form')`
 `
 
 const CommentInput = styled(InputBase)`
-  margin-left: ${({ theme }: StylePropTypes) => theme.spacing(1)}px;
+  margin-left: ${({ theme }: any) => theme.spacing(1)}px;
   flex: 1;
 
   textarea {
@@ -67,7 +67,7 @@ const SendButton = styled(IconButton)`
 const CommentBox = () => {
   const { authHeaders } = useUserContext()
   const socket = useWebSocketContext()
-  const [comments, setComments] = useState<string[]>([])
+  const [comments] = useState<string[]>([])
   const [commentText, setCommentText] = useState('')
   const [error, setError] = useState<string | null>(null)
 
@@ -136,7 +136,7 @@ const CommentBox = () => {
   }
 
   return (
-    <CommentBoxContainer component="form">
+    <CommentBoxContainer>
       <CommentList>
         {comments.map((comment, index) => (
           <CommentItem key={index}>
@@ -156,6 +156,12 @@ const CommentBox = () => {
         <SendButton type="submit" aria-label="send">
           <SendIcon />
         </SendButton>
+        {error && (
+          <Alert severity="error">
+            <AlertTitle>Error</AlertTitle>
+            {error}
+          </Alert>
+        )}
       </CommentForm>
     </CommentBoxContainer>
   )
