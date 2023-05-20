@@ -132,7 +132,7 @@ worldDataRouter.get(
       const worldQueryValues = [authedUserId]
       const queryRes = await db.query(worldQuery, worldQueryValues)
 
-      const ownedWorlds: Contracts.GetWorlds.GetWorldsResponse = queryRes.rows.map((row) => ({
+      const ownedWorlds: Contracts.GetWorlds.GetWorldsResponse = queryRes.rows.map((row: any) => ({
         id: row.worldid,
         worldName: row.worldname,
         worldHasPassword: !!row.password,
@@ -148,11 +148,11 @@ worldDataRouter.get(
 
       const attendedWorldsQuery =
         'SELECT worlds.id as worldId, worlds.name as worldName, worlds."password", users.id as ownerId, users.username as ownerName FROM worlds JOIN users ON worlds.ownerId = users.id WHERE worlds.id = ANY($1::int[])'
-      const attendedWorldsQueryValues = [worldUsersQueryRes.rows.map((row) => row.worldId)]
+      const attendedWorldsQueryValues = [worldUsersQueryRes.rows.map((row: any) => row.worldId)]
       const attendedWorldsQueryRes = await db.query(attendedWorldsQuery, attendedWorldsQueryValues)
 
       const attendedWorlds: Contracts.GetWorlds.GetWorldsResponse = attendedWorldsQueryRes.rows.map(
-        (row) => ({
+        (row: any) => ({
           id: row.worldid,
           worldName: row.worldname,
           worldHasPassword: !!row.password,
