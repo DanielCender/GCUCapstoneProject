@@ -1,8 +1,14 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { styled } from '@mui/system'
 import { Paper, InputBase, IconButton, Divider, List, ListItem, ListItemText } from '@mui/material'
 import SendIcon from '@mui/icons-material/Send'
 import { useUserContext } from '../../state/UserContext'
+import { useWebSocketContext } from '../../state/WebSocketContext'
+import {
+  ClientSentWSMessageType,
+  ClientWSMessage,
+  WebSocketMessages,
+} from '../../../../types/Messages'
 
 type StylePropTypes = { theme: { spacing: (nbr: number) => any } }
 
@@ -60,6 +66,7 @@ const SendButton = styled(IconButton)`
 
 const CommentBox = () => {
   const { authHeaders } = useUserContext()
+  const socket = useWebSocketContext()
   const [comments, setComments] = useState<string[]>([])
   const [commentText, setCommentText] = useState('')
   const [error, setError] = useState<string | null>(null)
@@ -76,6 +83,18 @@ const CommentBox = () => {
   //       setInputValue('')
   //     }
   //   }
+
+  useEffect(() => {
+    const msg: WebSocketMessages.SendChatMessage = {
+      type: ClientSentWSMessageType.SendChatMessage,
+      body: {
+        authJwt: localStorage.getItem('authToken') ?? '',
+        worldId: localStorage.getItem('worldId') ?? '',
+        text: 'sample text message',
+      },
+    }
+    socket?.send(JSON.stringify(msg))
+  }, [socket])
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault()

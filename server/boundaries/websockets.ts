@@ -1,10 +1,20 @@
 import WebSocket from 'ws'
-import { messageReducer } from './helpers/messageReducer'
 import { parseBufferToMessage, parseMessageToBuffer } from './helpers/parseMessage'
 import { decodeAuthToken } from './helpers/authTokenDecode'
-import { ClientWSMessage } from '../../types/Messages'
+import {
+  ClientSentWSMessageType,
+  ClientWSMessage,
+  ServerSentWSMessageType,
+  WebSocketMessages,
+} from '../../types/Messages'
+import { removeUserFromWorldState, worldStateObj } from '../state/worldStateObj'
 
-class AbstractWebSocketServer {
+type MessageProcessingResultStatus = {
+  status: number
+  message: string
+}
+
+class WebSocketServer {
   public server: WebSocket.Server
   public port: number
   public clients: Record<string, Set<WebSocket>>
@@ -12,6 +22,7 @@ class AbstractWebSocketServer {
   constructor(port: number) {
     this.server = new WebSocket.Server({ port })
     this.port = port
+    this.clients = {}
     this.server.on('connection', this.handleConnection.bind(this))
   }
 
@@ -21,46 +32,136 @@ class AbstractWebSocketServer {
     socket.on('error', this.handleError.bind(this, socket))
   }
 
+  /**
+   * @description Filters all saved clients which are associated with a worldId and sends message only to those.
+   * @param worldId
+   * @param messageBuffer {Buffer}
+   */
+  sendMessageToSameWorldClients(worldId: string, messageBuffer: Buffer): void {
+    const applicableUserClients = worldStateObj[worldId].connectedUsers
+    this.server.clients.forEach((client) => {
+      if (applicableUserClients.has((client as any).clientId)) {
+        client.send(messageBuffer)
+      }
+    })
+  }
+
+  logConnectionCount() {
+    console.info('Now has ', this.clients.length, ' connected to the WS Server')
+  }
+
   async handleMessage(socket: WebSocket, message: Buffer) {
-    // Override this method in a subclass to handle incoming messages
-  }
+    try {
+      console.log('*** socket client id in handleMessage ', (socket as any).clientId)
+      const msg: ClientWSMessage | null = parseBufferToMessage(message)
+      if (!msg) {
+        console.error('Could not process message, exiting...')
+        return
+      }
 
-  handleClose(socket: WebSocket, code: number, reason: string) {
-    // Override this method in a subclass to handle socket close events
-  }
+      console.log(`Received message from socket: ${JSON.stringify(msg)}`)
+      const decodedAuthHeader = await decodeAuthToken(msg.body.authJwt)
+      console.log('decoded auth header: ', decodedAuthHeader)
+      const userId = decodedAuthHeader.userId
 
-  handleError(socket: WebSocket, error: Error) {
-    // Override this method in a subclass to handle socket error events
-  }
+      //   const resultMessage = await messageReducer(this, socket, msg, decodedAuthHeader.userId)
+      let resultMessage: MessageProcessingResultStatus = {
+        status: 200,
+        message: 'Message processed successfully',
+      }
 
-  close() {
-    this.server.close()
-  }
-}
+      switch (msg.type) {
+        case ClientSentWSMessageType.JoinWorld: {
+          const { worldId } = (msg as WebSocketMessages.JoinWorldMessage).body
+          if (!worldStateObj[worldId].connectedUsers.has(userId)) {
+            throw new Error('User not found in world state. Please try to re-join the server')
+          }
+          ;(socket as any).clientId = userId
+          if (this.clients[worldId]) {
+            this.clients[worldId].add(socket)
+          } else {
+            this.clients[worldId] = new Set([socket])
+          }
+          this.logConnectionCount()
 
-class WebSocketServer extends AbstractWebSocketServer {
-  async handleMessage(socket: WebSocket, message: Buffer) {
-    const msg: ClientWSMessage | null = parseBufferToMessage(message)
-    if (!msg) {
-      console.error('Could not process message, exiting...')
-    }
+          // * Filter saved socket clients and pass along the server-side message announcing the new user
+          const messageBuffer = parseMessageToBuffer({
+            type: ServerSentWSMessageType.UserJoined,
+            body: {
+              userId,
+              username: decodedAuthHeader.username,
+            },
+          })
+          if (messageBuffer) {
+            this.sendMessageToSameWorldClients(worldId, messageBuffer)
+          }
+          break
+        }
+        case ClientSentWSMessageType.LeaveWorld: {
+          const { worldId } = (msg as WebSocketMessages.LeaveWorldMessage).body
+          removeUserFromWorldState(worldId, userId)
+          if (this.clients[worldId]) {
+            this.clients[worldId].delete(socket)
+          }
+          this.logConnectionCount()
 
-    console.log(`Received message from socket: ${JSON.stringify(msg)}`)
-    const decodedAuthHeader = await decodeAuthToken(msg.body.authJwt)
-    console.log('decoded auth header: ', decodedAuthHeader)
-    const resultMessage = await messageReducer(decodedAuthHeader.userId, msg)
-    console.info(
-      'Processed message. Sending to all clients with result: ',
-      JSON.stringify(resultMessage)
-    )
+          const messageBuffer = parseMessageToBuffer({
+            type: ServerSentWSMessageType.UserLeft,
+            body: {
+              userId,
+              username: decodedAuthHeader.username,
+            },
+          })
+          if (messageBuffer) {
+            this.sendMessageToSameWorldClients(worldId, messageBuffer)
+          }
+          break
+        }
+        case ClientSentWSMessageType.SendChatMessage: {
+          const { worldId, text } = (msg as WebSocketMessages.SendChatMessage).body
+          // todo: Make db call
 
-    // Send a response back to the client
-    // socket.clients.forEach(client => client.send)
-    socket.send(`Received your message: ${message}`)
+          // * Filter saved socket clients and pass along the server-side message announcing the new user
+          const messageBuffer = parseMessageToBuffer({
+            type: ServerSentWSMessageType.ChatMessageSent,
+            body: {
+              userId,
+              username: decodedAuthHeader.username,
+              text,
+            },
+          })
+          if (messageBuffer) {
+            this.sendMessageToSameWorldClients(worldId, messageBuffer)
+          }
+          break
+        }
+        default:
+          console.warn(
+            `Received unsupported message type ${
+              msg.type
+            }: Unable to process contents ${JSON.stringify(msg.body)}`
+          )
+      }
 
-    const messageBuffer = parseMessageToBuffer(resultMessage)
-    if (messageBuffer) {
-      this.server.clients.forEach((client) => client.send(messageBuffer))
+      //   const resultMessage: MessageProcessingResultStatus = {
+      //     status: 200,
+      //     message: 'Message processed successfully',
+      //   }
+      console.info(
+        'Processed message. Sending to all clients with result: ',
+        JSON.stringify(resultMessage)
+      )
+
+      // Send a response back to the client
+      // socket.clients.forEach(client => client.send)
+      socket.send(`Received your message: ${message}`)
+
+      const messageBuffer = parseMessageToBuffer(resultMessage)
+      if (messageBuffer) {
+        this.server.clients.forEach((client) => client.send(messageBuffer))
+      }
+    } catch (e: any) {
+      console.error('Some unhandled error occured: ', e.message)
     }
   }
 
@@ -72,6 +173,10 @@ class WebSocketServer extends AbstractWebSocketServer {
   handleError(socket: WebSocket, error: Error) {
     // Handle the socket error event here
     console.log(`Error on socket ${socket}: ${error.message}`)
+  }
+
+  close() {
+    this.server.close()
   }
 }
 

@@ -13,6 +13,11 @@ export const removeUserFromWorldState = (worldId: string, userId: string) => {
   return worldStateObj
 }
 
+export const addUserToWorldState = (worldId: string, userId: string) => {
+  worldStateObj[worldId].connectedUsers.add(userId)
+  return worldStateObj
+}
+
 export const clearWorldFromWorldState = (worldId: string) => {
   delete worldStateObj[worldId]
   return worldStateObj

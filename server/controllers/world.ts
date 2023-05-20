@@ -2,7 +2,7 @@ import express, { Request } from 'express'
 import { Contracts } from '../../types/Contracts'
 import { db } from '../boundaries/db'
 import { authenticateToken } from '../middleware'
-import { worldStateObj } from '../state/worldStateObj'
+import { addUserToWorldState, worldStateObj } from '../state/worldStateObj'
 
 const worldDataRouter = express.Router()
 
@@ -107,9 +107,9 @@ worldDataRouter.post(
       return
     }
 
-    // Prep world state to include this world and
+    // Prep world state to include this world and authorized user
     if (worldStateObj[worldId]) {
-      worldStateObj[worldId].connectedUsers.add(authedUserId)
+      addUserToWorldState(worldId, authedUserId)
     } else {
       worldStateObj[worldId] = {
         connectedUsers: new Set([authedUserId]),
