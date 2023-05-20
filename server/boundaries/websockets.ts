@@ -8,6 +8,7 @@ import {
   WebSocketMessages,
 } from '../../types/Messages'
 import { removeUserFromWorldState, worldStateObj } from '../state/worldStateObj'
+import { db } from './db'
 
 type MessageProcessingResultStatus = {
   status: number
@@ -121,6 +122,20 @@ class WebSocketServer {
           const { worldId, text } = (msg as WebSocketMessages.SendChatMessage).body
           // todo: Make db call
 
+          let created_at = Date.now()
+          // * Begin: DB Call
+          const messageInsertQuery =
+            'INSERT INTO worldMessages(text, authorId, worldId, created_at) VALUES($1, $2, $3, NOW()) RETURNING *'
+          const messageInsertValues = [text, userId, worldId]
+          try {
+            const worldCreateRes = await db.query(messageInsertQuery, messageInsertValues)
+            console.info('finished createing new worldMessages row: ', worldCreateRes.rows[0])
+            created_at = worldCreateRes.rows[0].created_at
+          } catch (err: any) {
+            console.log(err.stack)
+          }
+          // * End: DB Call
+
           // * Filter saved socket clients and pass along the server-side message announcing the new user
           const messageBuffer = parseMessageToBuffer({
             type: ServerSentWSMessageType.ChatMessageSent,
@@ -128,6 +143,7 @@ class WebSocketServer {
               userId,
               username: decodedAuthHeader.username,
               text,
+              created_at,
             },
           })
           if (messageBuffer) {
@@ -143,17 +159,12 @@ class WebSocketServer {
           )
       }
 
-      //   const resultMessage: MessageProcessingResultStatus = {
-      //     status: 200,
-      //     message: 'Message processed successfully',
-      //   }
       console.info(
         'Processed message. Sending to all clients with result: ',
         JSON.stringify(resultMessage)
       )
 
       // Send a response back to the client
-      // socket.clients.forEach(client => client.send)
       socket.send(`Received your message: ${message}`)
 
       const messageBuffer = parseMessageToBuffer(resultMessage)
