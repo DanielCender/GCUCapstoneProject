@@ -18,8 +18,6 @@ import { useChatContext } from '../../state/ChatContext'
 import { useWebSocketContext } from '../../state/WebSocketContext'
 import { ClientSentWSMessageType, WebSocketMessages } from '../../../../types/Messages'
 
-// type StylePropTypes = { theme: { spacing: (nbr: number) => any } }
-
 const CommentBoxContainer = styled(Paper)`
   margin: ${({ theme }: any) => theme.spacing(2)}px;
   padding: ${({ theme }: any) => theme.spacing(2)}px;
@@ -67,37 +65,14 @@ const SendButton = styled(IconButton)`
 `
 
 const CommentBox = () => {
-  const { authHeaders } = useUserContext()
   const socket = useWebSocketContext()
   const { messages } = useChatContext()
-  //   const [comments] = useState<string[]>([])
   const [commentText, setCommentText] = useState('')
   const [error, setError] = useState<string | null>(null)
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setCommentText(e.target.value)
   }
-
-  //   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-  //     console.log('in here')
-  //     e.preventDefault()
-  //     if (inputValue.trim()) {
-  //       setComments((prev) => [...prev, inputValue])
-  //       setInputValue('')
-  //     }
-  //   }
-
-  //   useEffect(() => {
-  //     const msg: WebSocketMessages.SendChatMessage = {
-  //       type: ClientSentWSMessageType.SendChatMessage,
-  //       body: {
-  //         authJwt: localStorage.getItem('authToken') ?? '',
-  //         worldId: localStorage.getItem('worldId') ?? '',
-  //         text: 'sample text message',
-  //       },
-  //     }
-  //     socket?.send(JSON.stringify(msg))
-  //   }, [socket])
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault()
@@ -118,50 +93,23 @@ const CommentBox = () => {
         },
       }
       socket?.send(JSON.stringify(msg))
-      //   const response = await fetch(`${import.meta.env.VITE_LITTLE_OFFICES_SERVER_URL}/worlds`, {
-      //     method: 'POST',
-      //     headers: {
-      //       'Content-Type': 'application/json',
-      //       ...authHeaders,
-      //     },
-      //     body: JSON.stringify(data),
-      //   })
-
-      //   const result = await response.json()
-
-      //   if (response.status !== 200) {
-      //     setError(result.message)
-      //     return
-      //   }
-
-      //   console.log('Response:', result)
-      //   alert('Successfully created new world: ' + result.name)
-      //   returnToWorldList()
     } catch (error: any) {
       console.error('Error:', error)
       alert(error.message)
     }
   }
 
-  // * Setup auto-scroll whenever a new
-  // todo: Make sure scroll doesn't start at top of chat list every time a new message received
-  const scrollRef = useRef<HTMLUListElement>(null)
+  // * Setup auto-scroll whenever a new message is added to the message context
+  const scrollRef = useRef<HTMLLIElement>(null)
   useEffect(() => {
-    scrollRef?.current?.lastElementChild?.scrollIntoView({ behavior: 'smooth' })
-  }, [messages])
+    scrollRef?.current?.scrollIntoView({ behavior: 'smooth' })
+  }, [scrollRef, messages])
 
   return (
     <CommentBoxContainer>
-      <CommentList ref={scrollRef}>
+      <CommentList>
         {messages.map((comment, index, arr) => (
-          <CommentItem
-            key={index}
-            //   ref={el => {
-            //     if(index === arr.length - 1) {
-            //         return scrollRef
-            //     }
-            //   }}
-          >
+          <CommentItem key={index} ref={index === arr.length - 1 ? scrollRef : null}>
             <CommentText primary={comment.authorName} secondary={comment.text} />
           </CommentItem>
         ))}

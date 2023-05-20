@@ -1,23 +1,56 @@
 import { useContext, createContext, PropsWithChildren, useState, useEffect } from 'react'
-import { ClientSentWSMessageType, WebSocketMessages } from '../../../types/Messages'
+import {
+  ClientSentWSMessageType,
+  ServerSentWSMessageType,
+  ServerWSMessage,
+  WebSocketMessages,
+} from '../../../types/Messages'
+import { useChatContext } from './ChatContext'
+
+export const parseMessageToJSON = (messageString: string): ServerWSMessage | null => {
+  try {
+    return JSON.parse(messageString)
+  } catch (e: any) {
+    console.error('Error when parsing message string: ', e.message)
+  }
+  return null
+}
 
 export const WebSocketContext = createContext<WebSocket | null>(null)
 
 export const WebSocketContextProvider: React.FunctionComponent<PropsWithChildren> = ({
   children,
 }) => {
+  const { addNewMessage } = useChatContext()
   const [socket, setSocket] = useState<WebSocket | null>(null)
 
   const handleOnOpenSocket = (event: WebSocketEventMap['open']) => {
     console.log('Connected to WebSocket server')
     console.log('event: ', JSON.stringify(event, null, 2))
-    // Send a message to the server
-    // const message = { type: 'greeting', name: 'Bob' }
-    // socket.send(JSON.stringify(message))
   }
 
   const handleOnMessageSocket = (event: WebSocketEventMap['message']) => {
     console.log(`Received message: ${event.data}`)
+    console.log('typeof body: ', typeof event.data)
+    const message = parseMessageToJSON(event.data)
+    if (message === null) {
+      console.warn('received unparsable message from service: ', event)
+    }
+    console.log('message.body: ', message)
+    switch (message?.type) {
+      case ServerSentWSMessageType.ChatMessageSent: {
+        addNewMessage((message as WebSocketMessages.ChatMessageSentMessage).body)
+        break
+      }
+      case ServerSentWSMessageType.UserJoined: {
+        // todo: Implement
+        break
+      }
+      case ServerSentWSMessageType.UserLeft: {
+        // todo: Implement
+        break
+      }
+    }
 
     // Close the connection after receiving a message
     // socket.close()
@@ -60,14 +93,6 @@ export const WebSocketContextProvider: React.FunctionComponent<PropsWithChildren
       newSocket.close()
     }
   }, [])
-
-  //   return () => {
-  //     socket.removeEventListener('open', handleOnOpenSocket)
-  //     socket.removeEventListener('message', handleOnMessageSocket)
-  //     socket.removeEventListener('close', handleOnCloseSocket)
-  //     socket.removeEventListener('error', handleOnErrorSocket)
-  //     socket.close()
-  //   }
 
   return <WebSocketContext.Provider value={socket}>{children}</WebSocketContext.Provider>
 }

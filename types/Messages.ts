@@ -1,3 +1,5 @@
+import { Contracts } from './Contracts'
+
 export enum Message {
   UPDATE_PLAYER,
   READY_TO_CONNECT,
@@ -53,12 +55,7 @@ export namespace WebSocketMessages {
 
   export interface ChatMessageSentMessage extends ServerWSMessage {
     type: ServerSentWSMessageType.ChatMessageSent
-    body: {
-      userId: string
-      username: string
-      text: string
-      created_at: string
-    }
+    body: Contracts.GetWorldMessages.MessageItem
   }
 
   export interface JoinWorldMessage extends ClientWSMessage {
