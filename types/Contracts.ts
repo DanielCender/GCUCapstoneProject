@@ -1,4 +1,3 @@
-import { UserAvatar } from './constants'
 import { IModel } from './Models'
 
 export namespace Contracts {
@@ -16,7 +15,6 @@ export namespace Contracts {
       text: string
       authorId: string
       authorName: string
-      authorAvatar: UserAvatar
       createdAt: string
     }
     export type GetWorldMessagesResponse = MessageItem[]

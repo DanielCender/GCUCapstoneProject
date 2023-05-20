@@ -1,3 +1,4 @@
+// todo: Unused, need to implement avatar selection preferences table and routes, etc.
 export const USER_AVATAR_OPTIONS = [
   'henry',
   'pam',

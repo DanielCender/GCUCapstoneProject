@@ -39,12 +39,14 @@ class WebSocketServer {
    * @param messageBuffer {Buffer}
    */
   sendMessageToSameWorldClients(worldId: string, messageBuffer: Buffer): void {
-    const applicableUserClients = worldStateObj[worldId].connectedUsers
-    this.server.clients.forEach((client) => {
-      if (applicableUserClients.has((client as any).clientId)) {
-        client.send(messageBuffer)
-      }
-    })
+    if (worldStateObj[worldId]) {
+      const applicableUserClients = worldStateObj[worldId].connectedUsers
+      this.server.clients.forEach((client) => {
+        if (applicableUserClients.has((client as any).clientId)) {
+          client.send(messageBuffer)
+        }
+      })
+    }
   }
 
   logConnectionCount() {

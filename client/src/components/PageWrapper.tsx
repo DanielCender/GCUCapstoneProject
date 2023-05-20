@@ -80,6 +80,8 @@ const Footer = styled('footer')`
 const PageWrapper: FunctionComponent<PropsWithChildren> = ({ children }) => {
   const { authenticated, logout } = useUserContext()
   const { setCurrentPage } = useNavContext()
+
+  const worldId = localStorage.getItem('worldId')
   return (
     <PageContainer>
       <StyledMenuBar>
@@ -94,14 +96,27 @@ const PageWrapper: FunctionComponent<PropsWithChildren> = ({ children }) => {
             </HeaderButton>
           ) : (
             <>
-              <HeaderButton
-                variant="contained"
-                onClick={() => {
-                  setCurrentPage('worldselect')
-                }}
-              >
-                Worlds
-              </HeaderButton>
+              {worldId ? (
+                <HeaderButton
+                  variant="contained"
+                  onClick={() => {
+                    localStorage.removeItem('worldId')
+                    // todo: Make call to /world/:worldId/leave
+                    setCurrentPage('worldselect')
+                  }}
+                >
+                  Leave World
+                </HeaderButton>
+              ) : (
+                <HeaderButton
+                  variant="contained"
+                  onClick={() => {
+                    setCurrentPage('worldselect')
+                  }}
+                >
+                  Worlds
+                </HeaderButton>
+              )}
               <HeaderButton
                 variant="text"
                 onClick={() => {
@@ -126,9 +141,7 @@ const PageWrapper: FunctionComponent<PropsWithChildren> = ({ children }) => {
         {children}
       </PageContents>
       <Footer>
-        <div style={{ marginLeft: '28px' }}>
-          Copyright by Daniel Cender {new Date().getFullYear()}
-        </div>
+        <div style={{ marginLeft: '28px' }}>Copyright Daniel Cender {new Date().getFullYear()}</div>
         <div>
           <HeaderButton href="https://github.com/DanielCender" color="primary">
             GitHub

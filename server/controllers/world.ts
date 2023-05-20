@@ -4,6 +4,22 @@ import { db } from '../boundaries/db'
 import { authenticateToken } from '../middleware'
 import { addUserToWorldState, worldStateObj } from '../state/worldStateObj'
 
+const worldHasPasscode = async (worldId: string): Promise<boolean> => {
+  try {
+    const worldCheckQuery = 'SELECT * FROM worlds WHERE id = $1'
+    const worldCheckValues = [worldId]
+    const queryRes = await db.query(worldCheckQuery, worldCheckValues)
+    if (queryRes.rows.length !== 1) {
+      return false
+    }
+
+    return !!queryRes.rows[0]?.password
+  } catch (err: any) {
+    console.log(err.stack)
+    return false
+  }
+}
+
 const worldDataRouter = express.Router()
 
 worldDataRouter.post(
@@ -162,6 +178,58 @@ worldDataRouter.get(
       )
 
       res.status(200).send([...ownedWorlds, ...attendedWorlds])
+    } catch (err: any) {
+      console.log(err.stack)
+      res.status(500).send([])
+      return
+    }
+  }
+)
+
+worldDataRouter.get(
+  '/worlds/:worldId/messages',
+  authenticateToken,
+  async (
+    req: Request<{ worldId: string }, Contracts.GetWorldMessages.GetWorldMessagesResponse>,
+    res
+  ) => {
+    const {
+      authedUserId,
+      params: { worldId },
+    } = req
+
+    const hasPasscode = await worldHasPasscode(worldId)
+    if (hasPasscode) {
+      // * We can presume the user would have already "joined" the world prior to querying
+      // *  this route. If they aren't in the valid world state user list, then we can't guarantee
+      // *  they passed the world passcode check
+      if (!worldStateObj[worldId]?.connectedUsers.has(authedUserId)) {
+        console.error(
+          `User ${authedUserId} just attempted to illegally access world ${worldId}'s messages`
+        )
+        res.status(500).send([])
+        return
+      }
+    }
+
+    try {
+      // * Get all world messages
+      const worldQuery =
+        'SELECT worldMessages.id, worldMessages.worldId as worldId, worldMessages.text, worldMessages.created_at, worldMessages.authorId, users.username as authorName FROM worldMessages JOIN users ON worldMessages.authorId = users.id WHERE worldMessages.worldId = $1'
+      const worldQueryValues = [worldId]
+      const queryRes = await db.query(worldQuery, worldQueryValues)
+
+      const worldMessages: Contracts.GetWorldMessages.GetWorldMessagesResponse = queryRes.rows.map(
+        (row: any) => ({
+          id: row.id,
+          text: row.text,
+          authorId: row.authorid,
+          authorName: row.authorname,
+          createdAt: row.created_at,
+        })
+      )
+
+      res.status(200).send(worldMessages)
     } catch (err: any) {
       console.log(err.stack)
       res.status(500).send([])
