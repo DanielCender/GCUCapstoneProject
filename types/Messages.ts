@@ -57,6 +57,7 @@ export namespace WebSocketMessages {
       userId: string
       username: string
       text: string
+      created_at: string
     }
   }
 
