@@ -1,4 +1,5 @@
 import { useContext, createContext, PropsWithChildren, useState, useEffect } from 'react'
+import { ClientSentWSMessageType, WebSocketMessages } from '../../../types/Messages'
 
 export const WebSocketContext = createContext<WebSocket | null>(null)
 
@@ -33,11 +34,23 @@ export const WebSocketContextProvider: React.FunctionComponent<PropsWithChildren
 
   useEffect(() => {
     const newSocket = new WebSocket(`${import.meta.env.VITE_LITTLE_OFFICES_WS_SERVER_URL}`)
-    newSocket.addEventListener('open', handleOnOpenSocket)
+    newSocket.addEventListener('open', () => {
+      console.log('Connected to WebSocket server')
+      console.log('event: ', JSON.stringify(event, null, 2))
+      const message: WebSocketMessages.JoinWorldMessage = {
+        type: ClientSentWSMessageType.JoinWorld,
+        body: {
+          authJwt: localStorage.getItem('authToken') ?? '',
+          worldId: localStorage.getItem('worldId') ?? '',
+        },
+      }
+      newSocket.send(JSON.stringify(message))
+      setSocket(newSocket)
+    })
     newSocket.addEventListener('message', handleOnMessageSocket)
     newSocket.addEventListener('close', handleOnCloseSocket)
     newSocket.addEventListener('error', handleOnErrorSocket)
-    setSocket(newSocket)
+    // setSocket(newSocket)
     // * Close connections and remove all event handlers as context unmounts
     return () => {
       newSocket.removeEventListener('open', handleOnOpenSocket)
