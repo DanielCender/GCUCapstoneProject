@@ -62,7 +62,7 @@ export const UserContextProvider: React.FunctionComponent<PropsWithChildren> = (
   }
 
   const logout = () => {
-    localStorage.removeItem('authToken')
+    localStorage.clear()
     setJwt('')
   }
 

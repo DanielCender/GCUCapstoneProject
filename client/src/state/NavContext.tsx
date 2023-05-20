@@ -33,9 +33,18 @@ export const NavContextProvider: React.FunctionComponent<PropsWithChildren> = ({
   // takes terminating route from the URL. Only supports one level deep, no nested routes
   const urlPathEnd = location.href.slice(location.href.lastIndexOf('/') + 1) ?? null
 
-  const defaultPage = APP_PAGE_OPTIONS.includes(urlPathEnd as AppPage)
-    ? (urlPathEnd as AppPage)
-    : defaultUserContext.currentPage
+  const defaultPage = (() => {
+    // * Auto-default to the world scene if we haven't explicitly decided to Leave the world view
+    if (localStorage.getItem('worldId') && localStorage.getItem('authToken')) {
+      return 'worldscene'
+    }
+
+    if (APP_PAGE_OPTIONS.includes(urlPathEnd as AppPage)) {
+      return urlPathEnd as AppPage
+    }
+
+    return defaultUserContext.currentPage
+  })()
 
   const [currentPage, setCurrentPage] = useState<AppPage>(defaultPage)
 

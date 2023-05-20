@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react'
+import * as React from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { styled } from '@mui/system'
 import {
   Paper,
@@ -13,6 +14,7 @@ import {
 } from '@mui/material'
 import SendIcon from '@mui/icons-material/Send'
 import { useUserContext } from '../../state/UserContext'
+import { useChatContext } from '../../state/ChatContext'
 import { useWebSocketContext } from '../../state/WebSocketContext'
 import { ClientSentWSMessageType, WebSocketMessages } from '../../../../types/Messages'
 
@@ -67,7 +69,8 @@ const SendButton = styled(IconButton)`
 const CommentBox = () => {
   const { authHeaders } = useUserContext()
   const socket = useWebSocketContext()
-  const [comments] = useState<string[]>([])
+  const { messages } = useChatContext()
+  //   const [comments] = useState<string[]>([])
   const [commentText, setCommentText] = useState('')
   const [error, setError] = useState<string | null>(null)
 
@@ -84,17 +87,17 @@ const CommentBox = () => {
   //     }
   //   }
 
-  useEffect(() => {
-    const msg: WebSocketMessages.SendChatMessage = {
-      type: ClientSentWSMessageType.SendChatMessage,
-      body: {
-        authJwt: localStorage.getItem('authToken') ?? '',
-        worldId: localStorage.getItem('worldId') ?? '',
-        text: 'sample text message',
-      },
-    }
-    socket?.send(JSON.stringify(msg))
-  }, [socket])
+  //   useEffect(() => {
+  //     const msg: WebSocketMessages.SendChatMessage = {
+  //       type: ClientSentWSMessageType.SendChatMessage,
+  //       body: {
+  //         authJwt: localStorage.getItem('authToken') ?? '',
+  //         worldId: localStorage.getItem('worldId') ?? '',
+  //         text: 'sample text message',
+  //       },
+  //     }
+  //     socket?.send(JSON.stringify(msg))
+  //   }, [socket])
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault()
@@ -105,42 +108,61 @@ const CommentBox = () => {
       return
     }
 
-    const data = {
-      worldId: localStorage.getItem('worldId'),
-      commentText,
-    }
-
     try {
-      const response = await fetch(`${import.meta.env.VITE_LITTLE_OFFICES_SERVER_URL}/worlds`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...authHeaders,
+      const msg: WebSocketMessages.SendChatMessage = {
+        type: ClientSentWSMessageType.SendChatMessage,
+        body: {
+          authJwt: localStorage.getItem('authToken') ?? '',
+          worldId: localStorage.getItem('worldId') ?? '',
+          text: commentText,
         },
-        body: JSON.stringify(data),
-      })
-
-      const result = await response.json()
-
-      if (response.status !== 200) {
-        setError(result.message)
-        return
       }
+      socket?.send(JSON.stringify(msg))
+      //   const response = await fetch(`${import.meta.env.VITE_LITTLE_OFFICES_SERVER_URL}/worlds`, {
+      //     method: 'POST',
+      //     headers: {
+      //       'Content-Type': 'application/json',
+      //       ...authHeaders,
+      //     },
+      //     body: JSON.stringify(data),
+      //   })
 
-      console.log('Response:', result)
+      //   const result = await response.json()
+
+      //   if (response.status !== 200) {
+      //     setError(result.message)
+      //     return
+      //   }
+
+      //   console.log('Response:', result)
       //   alert('Successfully created new world: ' + result.name)
       //   returnToWorldList()
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error:', error)
+      alert(error.message)
     }
   }
 
+  // * Setup auto-scroll whenever a new
+  // todo: Make sure scroll doesn't start at top of chat list every time a new message received
+  const scrollRef = useRef<HTMLUListElement>(null)
+  useEffect(() => {
+    scrollRef?.current?.lastElementChild?.scrollIntoView({ behavior: 'smooth' })
+  }, [messages])
+
   return (
     <CommentBoxContainer>
-      <CommentList>
-        {comments.map((comment, index) => (
-          <CommentItem key={index}>
-            <CommentText primary={comment} />
+      <CommentList ref={scrollRef}>
+        {messages.map((comment, index, arr) => (
+          <CommentItem
+            key={index}
+            //   ref={el => {
+            //     if(index === arr.length - 1) {
+            //         return scrollRef
+            //     }
+            //   }}
+          >
+            <CommentText primary={comment.authorName} secondary={comment.text} />
           </CommentItem>
         ))}
       </CommentList>

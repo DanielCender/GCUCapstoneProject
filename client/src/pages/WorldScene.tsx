@@ -3,6 +3,7 @@ import { styled } from '@mui/system'
 import { SceneWrapper } from '../components/Scene/SceneWrapper'
 // import { ChatBox } from '../components/Scene/ChatBoxAlt'
 import CommentBox from '../components/Scene/ChatMessageBox'
+import { ChatContextProvider } from '../state/ChatContext'
 import { WebSocketContextProvider } from '../state/WebSocketContext'
 
 const SceneContainer = styled('div')`
@@ -19,17 +20,19 @@ const SceneContainer = styled('div')`
 
 const WorldScene = () => {
   return (
-    <WebSocketContextProvider>
-      <SceneWrapper>
-        <SceneContainer>
-          <div style={{ height: 150, width: 400, border: '1px solid red' }}>
-            Voice Chat Indicators
-          </div>
-          <CommentBox />
-          {/* <ChatBox /> */}
-        </SceneContainer>
-      </SceneWrapper>
-    </WebSocketContextProvider>
+    <ChatContextProvider>
+      <WebSocketContextProvider>
+        <SceneWrapper>
+          <SceneContainer>
+            <div style={{ height: 150, width: 400, border: '1px solid red' }}>
+              Voice Chat Indicators
+            </div>
+            <CommentBox />
+            {/* <ChatBox /> */}
+          </SceneContainer>
+        </SceneWrapper>
+      </WebSocketContextProvider>
+    </ChatContextProvider>
   )
 }
 
