@@ -26,9 +26,6 @@ const SceneContainer = styled('div')`
 `
 
 const WorldScene = () => {
-  useWebSocketConnection()
-
-  // return <>World Scene</>
   return (
     <WebSocketContextProvider>
       <SceneWrapper>

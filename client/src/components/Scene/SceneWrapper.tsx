@@ -85,15 +85,25 @@ const SceneWrapper: FunctionComponent<PropsWithChildren> = ({ children }) => {
               Login
             </HeaderButton>
           ) : (
-            <HeaderButton
-              variant="contained"
-              onClick={() => {
-                logout()
-                setCurrentPage('home')
-              }}
-            >
-              Logout
-            </HeaderButton>
+            <>
+              <HeaderButton
+                variant="contained"
+                onClick={() => {
+                  setCurrentPage('worldselect')
+                }}
+              >
+                Worlds
+              </HeaderButton>
+              <HeaderButton
+                variant="text"
+                onClick={() => {
+                  logout()
+                  setCurrentPage('home')
+                }}
+              >
+                Logout
+              </HeaderButton>
+            </>
           )}
           <HeaderButton
             variant="outlined"

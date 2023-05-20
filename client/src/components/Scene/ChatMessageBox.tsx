@@ -2,10 +2,13 @@ import { useState } from 'react'
 import { styled } from '@mui/system'
 import { Paper, InputBase, IconButton, Divider, List, ListItem, ListItemText } from '@mui/material'
 import SendIcon from '@mui/icons-material/Send'
+import { useUserContext } from '../../state/UserContext'
+
+type StylePropTypes = { theme: { spacing: (nbr: number) => any } }
 
 const CommentBoxContainer = styled(Paper)`
-  margin: ${({ theme }) => theme.spacing(2)}px;
-  padding: ${({ theme }) => theme.spacing(2)}px;
+  margin: ${({ theme }: StylePropTypes) => theme.spacing(2)}px;
+  padding: ${({ theme }: StylePropTypes) => theme.spacing(2)}px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -17,7 +20,13 @@ const CommentList = styled(List)`
   width: 100%;
   max-height: 200px;
   overflow: auto;
-  background-color: ${({ theme }) => theme.palette.background.paper};
+  background-color: ${({
+    theme,
+  }: StylePropTypes & {
+    theme: {
+      palette: { background: { paper: string } }
+    }
+  }) => theme.palette.background.paper};
 `
 
 const CommentItem = styled(ListItem)`
@@ -35,7 +44,7 @@ const CommentForm = styled('form')`
 `
 
 const CommentInput = styled(InputBase)`
-  margin-left: ${({ theme }) => theme.spacing(1)}px;
+  margin-left: ${({ theme }: StylePropTypes) => theme.spacing(1)}px;
   flex: 1;
 
   textarea {
@@ -50,19 +59,60 @@ const SendButton = styled(IconButton)`
 `
 
 const CommentBox = () => {
+  const { authHeaders } = useUserContext()
   const [comments, setComments] = useState<string[]>([])
-  const [inputValue, setInputValue] = useState('')
+  const [commentText, setCommentText] = useState('')
+  const [error, setError] = useState<string | null>(null)
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setInputValue(e.target.value)
+    setCommentText(e.target.value)
   }
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-    e.stopPropagation()
-    if (inputValue.trim()) {
-      setComments((prev) => [...prev, inputValue])
-      setInputValue('')
+  //   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  //     console.log('in here')
+  //     e.preventDefault()
+  //     if (inputValue.trim()) {
+  //       setComments((prev) => [...prev, inputValue])
+  //       setInputValue('')
+  //     }
+  //   }
+
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault()
+    setError(null)
+
+    if (commentText == '') {
+      setError('Comment cannot be empty')
+      return
+    }
+
+    const data = {
+      worldId: localStorage.getItem('worldId'),
+      commentText,
+    }
+
+    try {
+      const response = await fetch(`${import.meta.env.VITE_LITTLE_OFFICES_SERVER_URL}/worlds`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...authHeaders,
+        },
+        body: JSON.stringify(data),
+      })
+
+      const result = await response.json()
+
+      if (response.status !== 200) {
+        setError(result.message)
+        return
+      }
+
+      console.log('Response:', result)
+      //   alert('Successfully created new world: ' + result.name)
+      //   returnToWorldList()
+    } catch (error) {
+      console.error('Error:', error)
     }
   }
 
@@ -80,7 +130,7 @@ const CommentBox = () => {
         <CommentInput
           placeholder="Add a comment"
           inputProps={{ 'aria-label': 'add comment' }}
-          value={inputValue}
+          value={commentText}
           onChange={handleInputChange}
           multiline={false} // Set to single-line
         />

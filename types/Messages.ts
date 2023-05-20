@@ -7,53 +7,80 @@ export enum Message {
   SEND_ROOM_DATA,
 }
 
-export interface WSMessageBody {
-  worldId: string
-}
-
-export type WSMessage = {
-  type: string
-  body: WSMessageBody // JSON body
-}
-
 export const enum ServerSentWSMessageType {
   UserJoined = 'user-joined',
   ChatMessageSent = 'chat-message-sent',
   UserLeft = 'user-left',
 }
 
-export const enum WSMessageType {
+export const enum ClientSentWSMessageType {
   JoinWorld = 'join-world',
+  SendChatMessage = 'send-chat-message',
   LeaveWorld = 'leave-world',
 }
 
+export interface WSClientMessageBody {
+  authJwt: string
+  worldId: string
+}
+
+export interface ServerWSMessage {
+  type: ServerSentWSMessageType
+  body: object // JSON body
+}
+
+export type ClientWSMessage = {
+  type: ClientSentWSMessageType
+  body: WSClientMessageBody
+}
+
 export namespace WebSocketMessages {
-  export interface UserJoinedMessage extends WSMessage {
+  export interface UserJoinedMessage extends ServerWSMessage {
     type: ServerSentWSMessageType.UserJoined
     body: {
-      worldId: string
       userId: string
       username: string
-      avatar: string
     }
   }
 
-  export interface UserLeftMessage extends WSMessage {
+  export interface UserLeftMessage extends ServerWSMessage {
     type: ServerSentWSMessageType.UserLeft
     body: {
-      worldId: string
       userId: string
       username: string
     }
   }
 
-  export interface ChatMessageSentMessage extends WSMessage {
+  export interface ChatMessageSentMessage extends ServerWSMessage {
     type: ServerSentWSMessageType.ChatMessageSent
     body: {
-      worldId: string
       userId: string
       username: string
-      avatar: string
+      text: string
+    }
+  }
+
+  export interface JoinWorldMessage extends ClientWSMessage {
+    type: ClientSentWSMessageType.JoinWorld
+    body: {
+      authJwt: string
+      worldId: string
+    }
+  }
+
+  export interface LeaveWorldMessage extends ClientWSMessage {
+    type: ClientSentWSMessageType.LeaveWorld
+    body: {
+      authJwt: string
+      worldId: string
+    }
+  }
+
+  export interface SendChatMessage extends ClientWSMessage {
+    type: ClientSentWSMessageType.SendChatMessage
+    body: {
+      authJwt: string
+      worldId: string
       text: string
     }
   }
