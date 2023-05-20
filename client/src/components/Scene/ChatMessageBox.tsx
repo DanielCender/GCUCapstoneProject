@@ -13,7 +13,6 @@ import {
   AlertTitle,
 } from '@mui/material'
 import SendIcon from '@mui/icons-material/Send'
-import { useUserContext } from '../../state/UserContext'
 import { useChatContext } from '../../state/ChatContext'
 import { useWebSocketContext } from '../../state/WebSocketContext'
 import { ClientSentWSMessageType, WebSocketMessages } from '../../../../types/Messages'

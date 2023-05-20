@@ -78,12 +78,13 @@ export const WebSocketContextProvider: React.FunctionComponent<PropsWithChildren
         },
       }
       newSocket.send(JSON.stringify(message))
+      // * Important to set socket only after it's in OPEN state
       setSocket(newSocket)
     })
     newSocket.addEventListener('message', handleOnMessageSocket)
     newSocket.addEventListener('close', handleOnCloseSocket)
     newSocket.addEventListener('error', handleOnErrorSocket)
-    // setSocket(newSocket)
+
     // * Close connections and remove all event handlers as context unmounts
     return () => {
       newSocket.removeEventListener('open', handleOnOpenSocket)
