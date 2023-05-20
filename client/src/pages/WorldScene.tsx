@@ -1,8 +1,7 @@
 import { styled } from '@mui/system'
 
 import { SceneWrapper } from '../components/Scene/SceneWrapper'
-// import { ChatBox } from '../components/Scene/ChatBoxAlt'
-import CommentBox from '../components/Scene/ChatMessageBox'
+import ChatMessageBox from '../components/Scene/ChatMessageBox'
 import { ChatContextProvider } from '../state/ChatContext'
 import { WebSocketContextProvider } from '../state/WebSocketContext'
 
@@ -27,7 +26,7 @@ const WorldScene = () => {
             <div style={{ height: 150, width: 400, border: '1px solid red' }}>
               Voice Chat Indicators
             </div>
-            <CommentBox />
+            <ChatMessageBox />
             {/* <ChatBox /> */}
           </SceneContainer>
         </SceneWrapper>

@@ -1,4 +1,4 @@
-import { useContext, createContext, PropsWithChildren, useMemo, useState, useEffect } from 'react'
+import { useContext, createContext, PropsWithChildren, useState, useEffect } from 'react'
 import useSWR from 'swr'
 import { Snackbar, Alert } from '@mui/material'
 import { Contracts } from '../../../types/Contracts'
