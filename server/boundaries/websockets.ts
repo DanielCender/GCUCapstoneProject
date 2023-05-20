@@ -5,6 +5,7 @@ import {
   ClientSentWSMessageType,
   ClientWSMessage,
   ServerSentWSMessageType,
+  ServerWSMessage,
   WebSocketMessages,
 } from '../../types/Messages'
 import { removeUserFromWorldState, worldStateObj } from '../state/worldStateObj'
@@ -68,10 +69,7 @@ class WebSocketServer {
       const userId = decodedAuthHeader.userId
 
       //   const resultMessage = await messageReducer(this, socket, msg, decodedAuthHeader.userId)
-      let resultMessage: MessageProcessingResultStatus = {
-        status: 200,
-        message: 'Message processed successfully',
-      }
+      let resultMessage: ServerWSMessage
 
       switch (msg.type) {
         case ClientSentWSMessageType.JoinWorld: {
@@ -122,35 +120,39 @@ class WebSocketServer {
         }
         case ClientSentWSMessageType.SendChatMessage: {
           const { worldId, text } = (msg as WebSocketMessages.SendChatMessage).body
-          // todo: Make db call
 
-          let created_at = Date.now()
+          let createdAt = Date.now()
           // * Begin: DB Call
           const messageInsertQuery =
             'INSERT INTO worldMessages(text, authorId, worldId, created_at) VALUES($1, $2, $3, NOW()) RETURNING *'
           const messageInsertValues = [text, userId, worldId]
           try {
             const worldCreateRes = await db.query(messageInsertQuery, messageInsertValues)
-            console.info('finished createing new worldMessages row: ', worldCreateRes.rows[0])
-            created_at = worldCreateRes.rows[0].created_at
+            console.info('created new worldMessages record: ', worldCreateRes.rows[0])
+            createdAt = worldCreateRes.rows[0].created_at
           } catch (err: any) {
             console.log(err.stack)
           }
           // * End: DB Call
 
           // * Filter saved socket clients and pass along the server-side message announcing the new user
-          const messageBuffer = parseMessageToBuffer({
+          resultMessage = {
             type: ServerSentWSMessageType.ChatMessageSent,
             body: {
-              userId,
-              username: decodedAuthHeader.username,
+              authorId: userId,
+              authorName: decodedAuthHeader.username,
               text,
-              created_at,
+              createdAt,
             },
-          })
-          if (messageBuffer) {
-            this.sendMessageToSameWorldClients(worldId, messageBuffer)
           }
+          this.sendMessageToSameWorldClients(
+            worldId,
+            JSON.stringify(resultMessage) as unknown as Buffer
+          )
+          //   const messageBuffer = parseMessageToBuffer(resultMessage)
+          //   if (messageBuffer) {
+          //     this.sendMessageToSameWorldClients(worldId, messageBuffer)
+          //   }
           break
         }
         default:
@@ -162,17 +164,17 @@ class WebSocketServer {
       }
 
       console.info(
-        'Processed message. Sending to all clients with result: ',
+        'Processed message. Posted back to all clients with result: ',
         JSON.stringify(resultMessage)
       )
 
-      // Send a response back to the client
-      socket.send(`Received your message: ${message}`)
+      //   // Send a response back to the client
+      //   socket.send(`Received your message: ${message}`)
 
-      const messageBuffer = parseMessageToBuffer(resultMessage)
-      if (messageBuffer) {
-        this.server.clients.forEach((client) => client.send(messageBuffer))
-      }
+      //   const messageBuffer = parseMessageToBuffer(resultMessage)
+      //   if (messageBuffer) {
+      //     this.server.clients.forEach((client) => client.send(JSON.stringify(resultMessage)))
+      //   }
     } catch (e: any) {
       console.error('Some unhandled error occured: ', e.message)
     }
