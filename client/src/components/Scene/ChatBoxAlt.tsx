@@ -71,6 +71,7 @@ const ChatBox = () => {
         userId: 'random-id-' + `${i}`,
         username: 'random-username',
         avatar: 'player-1',
+        created_at: new Date(Date.now() + i * 10000).toISOString(),
       }
     })
   const scrollRef = React.useRef<HTMLDivElement>(null)
