@@ -79,6 +79,7 @@ export const JoinWorldForm = () => {
 
       if (result.worldId) {
         localStorage.setItem('worldId', result.worldId)
+        localStorage.setItem('worldName', result.worldName)
         setCurrentPage('worldscene')
       }
     } catch (error) {

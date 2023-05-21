@@ -4,6 +4,9 @@ import { SceneWrapper } from '../components/Scene/SceneWrapper'
 import ChatMessageBox from '../components/Scene/ChatMessageBox'
 import { ChatContextProvider } from '../state/ChatContext'
 import { WebSocketContextProvider } from '../state/WebSocketContext'
+import ConnectedUserAvatarList from '../components/Scene/ConnectedUserAvatarList'
+import { ConnectedUsersList } from '../components/Scene/ConnectedUsersList'
+import { Whiteboard } from '../components/Scene/WhiteboardFrame'
 
 const SceneContainer = styled('div')`
   display: flex;
@@ -27,15 +30,18 @@ const SceneCommunicationBlock = styled('div')`
   /* align-items: flex-end; */
   flex-direction: column;
   flex: 1;
+  max-width: 25%;
 `
 
 const SceneWhiteboardBlock = styled('div')`
+  margin: ${({ theme }: any) => theme.spacing(2)};
   height: 100%;
   display: flex;
   justify-content: flex-start;
   align-items: stretch;
   flex-direction: column;
-  flex: 2;
+  flex: 3;
+  max-width: 75%;
 `
 
 const WorldScene = () => {
@@ -48,8 +54,9 @@ const WorldScene = () => {
               <ChatMessageBox />
             </SceneCommunicationBlock>
             <SceneWhiteboardBlock>
-              <div style={{ border: '1px solid red', flex: 1 }}>Voice Chat Indicators</div>
-              <div style={{ border: '1px solid red', flex: 6 }}>Whiteboard will go here</div>
+              {/* <ConnectedUserAvatarList /> */}
+              <ConnectedUsersList />
+              <Whiteboard />
             </SceneWhiteboardBlock>
           </SceneContainer>
         </SceneWrapper>
