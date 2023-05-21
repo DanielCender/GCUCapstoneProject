@@ -17,7 +17,17 @@ app.use(cookieParser(environment.JWT_SIGNATURE) as any)
 app.use(authRouter)
 app.use(worldDataRouter)
 
-app.listen(3000) // for http interactions
+// Define a route handler for the endpoint
+app.get('/', (req, res) => {
+  const htmlMessage =
+    '<h1>Nothing to see here: Visit <a href="dcgcucapstone.netlify.app">Little Offices</a> instead!</h1>'
+  res.send(htmlMessage)
+})
+
+// Start the server
+app.listen(3000, () => {
+  console.log('Server is running on port 8080')
+})
 
 const wsServer = new WebSocketServer(8080)
 
