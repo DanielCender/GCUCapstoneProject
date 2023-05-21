@@ -54,7 +54,7 @@ const ConnectedUsersList = () => {
         {[...names].map((name, index) => (
           <AvatarContainer key={index}>
             <Avatar>{name[0]}</Avatar>
-            <UserName variant="alignCenter">{name}</UserName>
+            <UserName align="center">{name}</UserName>
           </AvatarContainer>
         ))}
       </ScrollableContainer>
