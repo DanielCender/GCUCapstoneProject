@@ -12,12 +12,13 @@ const CommentBoxContainer = styled(Paper)`
   margin: ${({ theme }: any) => theme.spacing(2)}px;
   padding: ${({ theme }: any) => theme.spacing(2)}px;
   width: 100%;
-  /* min-width: 300px; */
+  max-width: 450px;
   height: 100%;
   flex: 6;
   display: flex;
   flex-direction: column;
-  align-items: center;
+  justify-content: flex-start;
+  align-items: stretch;
 `
 
 const MessageBoxHeader = styled('div')`
@@ -32,6 +33,7 @@ const MessageBoxHeader = styled('div')`
 
 const CommentList = styled(List)`
   width: 100%;
+  height: inherit;
   /* height: 100%;
   max-height: 200px; */
   overflow: auto;
@@ -50,7 +52,7 @@ const CommentText = styled(ListItemText)`
 const CommentForm = styled('form')`
   display: flex;
   align-items: center;
-  align-self: flex-start;
+  align-self: flex-end;
   width: 100%;
 `
 
