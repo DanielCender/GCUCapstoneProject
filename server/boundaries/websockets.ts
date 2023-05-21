@@ -32,14 +32,14 @@ class WebSocketServer {
   /**
    * @description Filters all saved clients which are associated with a worldId and sends message only to those.
    * @param worldId
-   * @param messageBuffer {Buffer}
+   * @param msgString {JSON string}
    */
-  sendMessageToSameWorldClients(worldId: string, messageBuffer: Buffer): void {
+  sendMessageToSameWorldClients(worldId: string, msgString: string): void {
     if (worldStateObj[worldId]) {
       const applicableUserClients = worldStateObj[worldId].connectedUsers
       this.server.clients.forEach((client) => {
         if (applicableUserClients.has((client as any).clientId)) {
-          client.send(messageBuffer)
+          client.send(msgString)
         }
       })
     }
@@ -81,16 +81,14 @@ class WebSocketServer {
           this.logConnectionCount()
 
           // * Filter saved socket clients and pass along the server-side message announcing the new user
-          const messageBuffer = parseMessageToBuffer({
+          resultMessage = {
             type: ServerSentWSMessageType.UserJoined,
             body: {
-              userId,
+              id: userId,
               username: decodedAuthHeader.username,
             },
-          })
-          if (messageBuffer) {
-            this.sendMessageToSameWorldClients(worldId, messageBuffer)
           }
+          this.sendMessageToSameWorldClients(worldId, JSON.stringify(resultMessage))
           break
         }
         case ClientSentWSMessageType.LeaveWorld: {
@@ -101,16 +99,14 @@ class WebSocketServer {
           }
           this.logConnectionCount()
 
-          const messageBuffer = parseMessageToBuffer({
+          resultMessage = {
             type: ServerSentWSMessageType.UserLeft,
             body: {
-              userId,
+              id: userId,
               username: decodedAuthHeader.username,
             },
-          })
-          if (messageBuffer) {
-            this.sendMessageToSameWorldClients(worldId, messageBuffer)
           }
+          this.sendMessageToSameWorldClients(worldId, JSON.stringify(resultMessage))
           break
         }
         case ClientSentWSMessageType.SendChatMessage: {
@@ -139,10 +135,7 @@ class WebSocketServer {
               createdAt,
             },
           }
-          this.sendMessageToSameWorldClients(
-            worldId,
-            JSON.stringify(resultMessage) as unknown as Buffer
-          )
+          this.sendMessageToSameWorldClients(worldId, JSON.stringify(resultMessage))
           break
         }
         default:

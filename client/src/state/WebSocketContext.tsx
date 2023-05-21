@@ -6,6 +6,7 @@ import {
   WebSocketMessages,
 } from '../../../types/Messages'
 import { useChatContext } from './ChatContext'
+import { useConnectedUsersContext } from './ConnectedUsersContext'
 
 export const parseMessageToJSON = (messageString: string): ServerWSMessage | null => {
   try {
@@ -22,6 +23,7 @@ export const WebSocketContextProvider: React.FunctionComponent<PropsWithChildren
   children,
 }) => {
   const { addNewMessage } = useChatContext()
+  const { addNewlyJoinedUser, removeLeavingUser } = useConnectedUsersContext()
   const [socket, setSocket] = useState<WebSocket | null>(null)
 
   const protocol = window.location.protocol.replace('http', 'ws')
@@ -49,17 +51,15 @@ export const WebSocketContextProvider: React.FunctionComponent<PropsWithChildren
         break
       }
       case ServerSentWSMessageType.UserJoined: {
-        // todo: Implement
+        addNewlyJoinedUser((message as WebSocketMessages.UserJoinedMessage).body)
         break
       }
       case ServerSentWSMessageType.UserLeft: {
-        // todo: Implement
+        console.log('received a user left message')
+        removeLeavingUser((message as WebSocketMessages.UserLeftMessage).body.id)
         break
       }
     }
-
-    // Close the connection after receiving a message
-    // socket.close()
   }
 
   const handleOnCloseSocket = (event: WebSocketEventMap['close']) => {

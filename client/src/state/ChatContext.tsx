@@ -61,7 +61,7 @@ export const ChatContextProvider: React.FunctionComponent<PropsWithChildren> = (
     >
       {children}
       <Snackbar open={isSnackbarOpen} autoHideDuration={3000} onClose={handleCloseSnackbar}>
-        <Alert onClose={handleCloseSnackbar} severity="success" sx={{ width: '100%' }}>
+        <Alert onClose={handleCloseSnackbar} severity="error" sx={{ width: '100%' }}>
           Error when fetching world Messages!
         </Alert>
       </Snackbar>

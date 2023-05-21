@@ -19,4 +19,10 @@ export namespace Contracts {
     }
     export type GetWorldMessagesResponse = MessageItem[]
   }
+  export namespace GetWorldConnectedUsers {
+    export interface UserItem extends IModel {
+      username: string
+    }
+    export type GetWorldConnectedUsersResponse = UserItem[]
+  }
 }

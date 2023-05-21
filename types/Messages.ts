@@ -40,7 +40,7 @@ export namespace WebSocketMessages {
   export interface UserJoinedMessage extends ServerWSMessage {
     type: ServerSentWSMessageType.UserJoined
     body: {
-      userId: string
+      id: string
       username: string
     }
   }
@@ -48,7 +48,7 @@ export namespace WebSocketMessages {
   export interface UserLeftMessage extends ServerWSMessage {
     type: ServerSentWSMessageType.UserLeft
     body: {
-      userId: string
+      id: string
       username: string
     }
   }

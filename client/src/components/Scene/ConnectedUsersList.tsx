@@ -1,6 +1,7 @@
 import { Avatar, Typography } from '@mui/material'
 import { styled } from '@mui/system'
 import { PALETTE } from '../../palette'
+import { useConnectedUsersContext } from '../../state/ConnectedUsersContext'
 
 const RootContainer = styled('div')`
   display: flex;
@@ -44,17 +45,19 @@ const UserName = styled(Typography)`
   text-shadow: 2px 2px 5px ${PALETTE['Bittersweet']};
 `
 
-const names = ['John Doe', 'Jane Smith', 'Mike Johnson', 'Emily Davis', 'Robert Brown']
+// const names = ['John Doe', 'Jane Smith', 'Mike Johnson', 'Emily Davis', 'Robert Brown']
 
 const ConnectedUsersList = () => {
+  const { users } = useConnectedUsersContext()
+
   return (
     <RootContainer>
       <BoxHeader>Connected Users</BoxHeader>
       <ScrollableContainer>
-        {[...names].map((name, index) => (
+        {users.map((user, index) => (
           <AvatarContainer key={index}>
-            <Avatar>{name[0]}</Avatar>
-            <UserName align="center">{name}</UserName>
+            <Avatar>{user.username[0]}</Avatar>
+            <UserName align="center">{user.username}</UserName>
           </AvatarContainer>
         ))}
       </ScrollableContainer>

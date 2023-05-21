@@ -2,7 +2,12 @@ import express, { Request } from 'express'
 import { Contracts } from '../../types/Contracts'
 import { db } from '../boundaries/db'
 import { authenticateToken } from '../middleware'
-import { addUserToWorldState, worldStateObj } from '../state/worldStateObj'
+import {
+  addUserToWorldState,
+  worldStateObj,
+  getUserIdsByWorldId,
+  isUserConnectedToWorld,
+} from '../state/worldStateObj'
 
 const worldHasPasscode = async (worldId: string): Promise<boolean> => {
   try {
@@ -232,6 +237,51 @@ worldDataRouter.get(
       )
 
       res.status(200).send(worldMessages)
+    } catch (err: any) {
+      console.log(err.stack)
+      res.status(500).send([])
+      return
+    }
+  }
+)
+
+worldDataRouter.get(
+  '/worlds/:worldId/connectedUsers',
+  authenticateToken,
+  async (
+    req: Request<
+      { worldId: string },
+      Contracts.GetWorldConnectedUsers.GetWorldConnectedUsersResponse
+    >,
+    res
+  ) => {
+    const {
+      authedUserId,
+      params: { worldId },
+    } = req
+
+    if (!isUserConnectedToWorld(worldId, authedUserId)) {
+      console.error(
+        `User ${authedUserId} just attempted to fetch all connected users on world: ${worldId}`
+      )
+      res.status(500).send([])
+      return
+    }
+
+    const connectedUserIds = getUserIdsByWorldId(worldId)
+
+    try {
+      const query = 'SELECT id, username FROM users WHERE id = ANY($1::int[])'
+      const values = [connectedUserIds]
+      const queryRes = await db.query(query, values)
+
+      const users: Contracts.GetWorldConnectedUsers.GetWorldConnectedUsersResponse =
+        queryRes.rows.map((row: any) => ({
+          id: row.id,
+          username: row.username,
+        }))
+
+      res.status(200).send(users)
     } catch (err: any) {
       console.log(err.stack)
       res.status(500).send([])
