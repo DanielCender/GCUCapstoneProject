@@ -4,7 +4,6 @@ import { SceneWrapper } from '../components/Scene/SceneWrapper'
 import ChatMessageBox from '../components/Scene/ChatMessageBox'
 import { ChatContextProvider } from '../state/ChatContext'
 import { WebSocketContextProvider } from '../state/WebSocketContext'
-import ConnectedUserAvatarList from '../components/Scene/ConnectedUserAvatarList'
 import { ConnectedUsersList } from '../components/Scene/ConnectedUsersList'
 import { Whiteboard } from '../components/Scene/WhiteboardFrame'
 
