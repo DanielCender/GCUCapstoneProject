@@ -25,8 +25,8 @@ app.get('/', (req, res) => {
 })
 
 // Start the server
-app.listen(3000, () => {
-  console.log('Server is running on port 8080')
+app.listen(Number(environment.PORT), () => {
+  console.log('Server is running on port ', environment.PORT)
 })
 
 const wsServer = new WebSocketServer(8080)
