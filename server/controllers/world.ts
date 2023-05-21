@@ -87,14 +87,14 @@ worldDataRouter.post(
   async (
     req: Request<
       {},
-      { message: string; worldId?: string },
+      { message: string; worldId?: string; worldName?: string },
       { worldId: string; worldPassword?: string }
     >,
     res
   ) => {
     const { authedUserId } = req
     const { worldId, worldPassword } = req.body
-
+    let worldName = ''
     // validation
     if (!worldId) {
       res.status(422).send({ message: 'Need to specify a world ID to join' })
@@ -117,6 +117,8 @@ worldDataRouter.post(
           return
         }
       }
+
+      worldName = queryRes.rows[0].name
     } catch (err: any) {
       console.log(err.stack)
       res.status(500).send({ message: 'Server error encountered' })
@@ -132,7 +134,7 @@ worldDataRouter.post(
         lastMessageSent: Date.now(),
       }
     }
-    res.status(200).send({ message: 'Successfully connected to world state!', worldId })
+    res.status(200).send({ message: 'Successfully connected to world state!', worldId, worldName })
   }
 )
 

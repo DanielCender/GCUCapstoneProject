@@ -73,12 +73,13 @@ const SceneWrapper: FunctionComponent<PropsWithChildren> = ({ children }) => {
   const { authenticated, logout } = useUserContext()
   const { setCurrentPage } = useNavContext()
   const worldId = localStorage.getItem('worldId')
+  const worldName = localStorage.getItem('worldName')
   return (
     <PageContainer>
       <StyledMenuBar>
         <div>{/* Empty div for alignment */}</div>
-        <HomeTitle type="button" onClick={() => setCurrentPage('home')}>
-          Little Offices
+        <HomeTitle type="button" onClick={() => setCurrentPage('home')} disabled={!!worldId}>
+          {worldName ?? 'Little Offices'}
         </HomeTitle>
         <StyledButtonGroup>
           {!authenticated ? (
@@ -92,6 +93,7 @@ const SceneWrapper: FunctionComponent<PropsWithChildren> = ({ children }) => {
                   variant="contained"
                   onClick={() => {
                     localStorage.removeItem('worldId')
+                    localStorage.removeItem('worldName')
                     // todo: Make call to /world/:worldId/leave
                     setCurrentPage('worldselect')
                   }}
