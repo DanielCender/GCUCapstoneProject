@@ -4,6 +4,8 @@ import Button from '@mui/material/Button'
 import { useUserContext } from '../../state/UserContext'
 import { useNavContext } from '../../state/NavContext'
 import { PALETTE } from '../../palette'
+import { useWebSocketContext } from '../../state/WebSocketContext'
+import { ClientSentWSMessageType } from '../../../../types/Messages'
 
 const headerHeight = 80
 const footerHeight = 80
@@ -71,6 +73,8 @@ const Footer = styled('footer')`
 
 const SceneWrapper: FunctionComponent<PropsWithChildren> = ({ children }) => {
   const { authenticated, logout } = useUserContext()
+  const socket = useWebSocketContext()
+
   const { setCurrentPage } = useNavContext()
   const worldId = localStorage.getItem('worldId')
   const worldName = localStorage.getItem('worldName')
@@ -92,8 +96,18 @@ const SceneWrapper: FunctionComponent<PropsWithChildren> = ({ children }) => {
                 <HeaderButton
                   variant="contained"
                   onClick={() => {
+                    socket?.send(
+                      JSON.stringify({
+                        type: ClientSentWSMessageType.LeaveWorld,
+                        body: {
+                          authJwt: localStorage.getItem('authToken'),
+                          worldId,
+                        },
+                      })
+                    )
                     localStorage.removeItem('worldId')
                     localStorage.removeItem('worldName')
+
                     // todo: Make call to /world/:worldId/leave
                     setCurrentPage('worldselect')
                   }}

@@ -8,6 +8,18 @@ export type WorldUsersState = Record<
 
 export let worldStateObj: WorldUsersState = {}
 
+export const getUserIdsByWorldId = (worldId: string): string[] => {
+  if (worldStateObj[worldId]) {
+    return [...worldStateObj[worldId].connectedUsers]
+  }
+
+  return []
+}
+
+export const isUserConnectedToWorld = (worldId: string, userId: string): boolean => {
+  return !!worldStateObj[worldId]?.connectedUsers.has(userId)
+}
+
 export const removeUserFromWorldState = (worldId: string, userId: string) => {
   worldStateObj[worldId].connectedUsers.delete(userId)
   return worldStateObj

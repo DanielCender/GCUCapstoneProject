@@ -6,6 +6,7 @@ import { ChatContextProvider } from '../state/ChatContext'
 import { WebSocketContextProvider } from '../state/WebSocketContext'
 import { ConnectedUsersList } from '../components/Scene/ConnectedUsersList'
 import { Whiteboard } from '../components/Scene/WhiteboardFrame'
+import { ConnectedUsersContextProvider } from '../state/ConnectedUsersContext'
 
 const SceneContainer = styled('div')`
   display: flex;
@@ -24,9 +25,6 @@ const SceneCommunicationBlock = styled('div')`
   padding-left: 30px;
   padding-top: 30px;
   padding-bottom: 30px;
-  /* display: flex; */
-  /* justify-content: flex-end; */
-  /* align-items: flex-end; */
   flex-direction: column;
   flex: 1;
   max-width: 25%;
@@ -46,20 +44,21 @@ const SceneWhiteboardBlock = styled('div')`
 const WorldScene = () => {
   return (
     <ChatContextProvider>
-      <WebSocketContextProvider>
-        <SceneWrapper>
-          <SceneContainer>
-            <SceneCommunicationBlock>
-              <ChatMessageBox />
-            </SceneCommunicationBlock>
-            <SceneWhiteboardBlock>
-              {/* <ConnectedUserAvatarList /> */}
-              <ConnectedUsersList />
-              <Whiteboard />
-            </SceneWhiteboardBlock>
-          </SceneContainer>
-        </SceneWrapper>
-      </WebSocketContextProvider>
+      <ConnectedUsersContextProvider>
+        <WebSocketContextProvider>
+          <SceneWrapper>
+            <SceneContainer>
+              <SceneCommunicationBlock>
+                <ChatMessageBox />
+              </SceneCommunicationBlock>
+              <SceneWhiteboardBlock>
+                <ConnectedUsersList />
+                <Whiteboard />
+              </SceneWhiteboardBlock>
+            </SceneContainer>
+          </SceneWrapper>
+        </WebSocketContextProvider>
+      </ConnectedUsersContextProvider>
     </ChatContextProvider>
   )
 }
