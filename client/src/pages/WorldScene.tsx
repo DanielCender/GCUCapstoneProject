@@ -7,7 +7,7 @@ import { WebSocketContextProvider } from '../state/WebSocketContext'
 
 const SceneContainer = styled('div')`
   display: flex;
-  justify-content: center;
+  justify-content: stretch;
   align-items: center;
   flex-direction: row;
   width: 100vw;
@@ -22,20 +22,20 @@ const SceneCommunicationBlock = styled('div')`
   padding-left: 30px;
   padding-top: 30px;
   padding-bottom: 30px;
-  display: flex;
-  justify-content: flex-end;
-  align-items: flex-end;
+  /* display: flex; */
+  /* justify-content: flex-end; */
+  /* align-items: flex-end; */
   flex-direction: column;
-  /* flex: 1; */
+  flex: 1;
 `
 
 const SceneWhiteboardBlock = styled('div')`
   height: 100%;
   display: flex;
   justify-content: flex-start;
-  align-items: center;
+  align-items: stretch;
   flex-direction: column;
-  /* flex: 2; */
+  flex: 2;
 `
 
 const WorldScene = () => {
