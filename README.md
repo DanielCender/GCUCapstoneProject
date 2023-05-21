@@ -10,6 +10,8 @@ Colyseus Service: [https://little-offices.herokuapp.com/colyseus/#/](https://lit
 
 Web Client: [https://dcgcucapstone.netlify.app/](https://dcgcucapstone.netlify.app/)
 
+In case of outage, here is the latest video going over basic functionality: [Loom Link](https://www.loom.com/share/73c2b67823a34e0389e024f65d8cbf3a)
+
 ## Start Application
 
 Start by installing dependencies:
