@@ -1,6 +1,5 @@
 import express from 'express'
 import cors from 'cors'
-import cookieParser from 'cookie-parser'
 import { APP_CONFIG } from './config'
 import { authRouter, worldDataRouter } from './controllers'
 import { WebSocketServer } from './boundaries/websockets'
@@ -11,8 +10,6 @@ const app = express()
 
 app.use(cors())
 app.use(express.json())
-
-app.use(cookieParser(environment.JWT_SIGNATURE) as any)
 
 app.use(authRouter)
 app.use(worldDataRouter)

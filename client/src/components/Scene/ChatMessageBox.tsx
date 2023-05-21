@@ -1,35 +1,39 @@
 import * as React from 'react'
 import { useEffect, useState, useRef } from 'react'
 import { styled } from '@mui/system'
-import {
-  Paper,
-  InputBase,
-  IconButton,
-  Divider,
-  List,
-  ListItem,
-  ListItemText,
-  Alert,
-  AlertTitle,
-} from '@mui/material'
+import { Paper, InputBase, IconButton, Divider, List, ListItem, ListItemText } from '@mui/material'
 import SendIcon from '@mui/icons-material/Send'
 import { useChatContext } from '../../state/ChatContext'
 import { useWebSocketContext } from '../../state/WebSocketContext'
 import { ClientSentWSMessageType, WebSocketMessages } from '../../../../types/Messages'
+import { PALETTE } from '../../palette'
 
 const CommentBoxContainer = styled(Paper)`
   margin: ${({ theme }: any) => theme.spacing(2)}px;
   padding: ${({ theme }: any) => theme.spacing(2)}px;
+  width: 100%;
+  /* min-width: 300px; */
+  height: 100%;
+  flex: 6;
   display: flex;
   flex-direction: column;
   align-items: center;
-  width: 50%;
-  min-width: 300px;
+`
+
+const MessageBoxHeader = styled('div')`
+  width: 100%;
+  padding: 10px 0px;
+  font-family: Ariel, sans-serif;
+  font-weight: 400;
+  font-style: italic;
+  color: ${PALETTE['Non Photo blue']};
+  text-shadow: 2px 2px 5px ${PALETTE['Sunset']};
 `
 
 const CommentList = styled(List)`
   width: 100%;
-  max-height: 200px;
+  /* height: 100%;
+  max-height: 200px; */
   overflow: auto;
   background-color: ${({ theme }: any) => theme.palette.background.paper};
 `
@@ -46,10 +50,12 @@ const CommentText = styled(ListItemText)`
 const CommentForm = styled('form')`
   display: flex;
   align-items: center;
+  align-self: flex-start;
+  width: 100%;
 `
 
 const CommentInput = styled(InputBase)`
-  margin-left: ${({ theme }: any) => theme.spacing(1)}px;
+  margin-left: ${({ theme }: any) => theme.spacing(1)};
   flex: 1;
 
   textarea {
@@ -67,7 +73,6 @@ const CommentBox = () => {
   const socket = useWebSocketContext()
   const { messages } = useChatContext()
   const [commentText, setCommentText] = useState('')
-  const [error, setError] = useState<string | null>(null)
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setCommentText(e.target.value)
@@ -75,10 +80,8 @@ const CommentBox = () => {
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault()
-    setError(null)
 
     if (commentText == '') {
-      setError('Comment cannot be empty')
       return
     }
 
@@ -92,6 +95,7 @@ const CommentBox = () => {
         },
       }
       socket?.send(JSON.stringify(msg))
+      setCommentText('')
     } catch (error: any) {
       console.error('Error:', error)
       alert(error.message)
@@ -106,10 +110,16 @@ const CommentBox = () => {
 
   return (
     <CommentBoxContainer>
+      <MessageBoxHeader>Messages</MessageBoxHeader>
       <CommentList>
         {messages.map((comment, index, arr) => (
           <CommentItem key={index} ref={index === arr.length - 1 ? scrollRef : null}>
-            <CommentText primary={comment.authorName} secondary={comment.text} />
+            <CommentText
+              primary={`${comment.authorName} | ${new Date(
+                comment.createdAt
+              ).toLocaleDateString()} ${new Date(comment.createdAt).toLocaleTimeString()}`}
+              secondary={comment.text}
+            />
           </CommentItem>
         ))}
       </CommentList>
@@ -125,12 +135,6 @@ const CommentBox = () => {
         <SendButton type="submit" aria-label="send">
           <SendIcon />
         </SendButton>
-        {error && (
-          <Alert severity="error">
-            <AlertTitle>Error</AlertTitle>
-            {error}
-          </Alert>
-        )}
       </CommentForm>
     </CommentBoxContainer>
   )

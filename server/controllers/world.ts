@@ -215,7 +215,7 @@ worldDataRouter.get(
     try {
       // * Get all world messages
       const worldQuery =
-        'SELECT worldMessages.id, worldMessages.worldId as worldId, worldMessages.text, worldMessages.created_at, worldMessages.authorId, users.username as authorName FROM worldMessages JOIN users ON worldMessages.authorId = users.id WHERE worldMessages.worldId = $1'
+        'SELECT worldMessages.id, worldMessages.worldId as worldId, worldMessages.text, worldMessages.createdAt, worldMessages.authorId, users.username as authorName FROM worldMessages JOIN users ON worldMessages.authorId = users.id WHERE worldMessages.worldId = $1'
       const worldQueryValues = [worldId]
       const queryRes = await db.query(worldQuery, worldQueryValues)
 
@@ -225,7 +225,7 @@ worldDataRouter.get(
           text: row.text,
           authorId: row.authorid,
           authorName: row.authorname,
-          createdAt: row.created_at,
+          createdAt: row.createdat,
         })
       )
 

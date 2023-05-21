@@ -24,6 +24,12 @@ export const WebSocketContextProvider: React.FunctionComponent<PropsWithChildren
   const { addNewMessage } = useChatContext()
   const [socket, setSocket] = useState<WebSocket | null>(null)
 
+  const protocol = window.location.protocol.replace('http', 'ws')
+  const endpoint =
+    process.env.NODE_ENV === 'production'
+      ? import.meta.env.VITE_LITTLE_OFFICES_WS_SERVER_URL
+      : `${protocol}//${window.location.hostname}:8080`
+
   const handleOnOpenSocket = (event: WebSocketEventMap['open']) => {
     console.log('Connected to WebSocket server')
     console.log('event: ', JSON.stringify(event, null, 2))
@@ -66,7 +72,7 @@ export const WebSocketContextProvider: React.FunctionComponent<PropsWithChildren
   }
 
   useEffect(() => {
-    const newSocket = new WebSocket(`${import.meta.env.VITE_LITTLE_OFFICES_WS_SERVER_URL}`)
+    const newSocket = new WebSocket(endpoint)
     newSocket.addEventListener('open', () => {
       console.log('Connected to WebSocket server')
       console.log('event: ', JSON.stringify(event, null, 2))

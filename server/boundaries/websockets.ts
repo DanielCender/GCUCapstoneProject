@@ -11,11 +11,6 @@ import {
 import { removeUserFromWorldState, worldStateObj } from '../state/worldStateObj'
 import { db } from './db'
 
-type MessageProcessingResultStatus = {
-  status: number
-  message: string
-}
-
 class WebSocketServer {
   public server: WebSocket.Server
   public port: number
@@ -74,9 +69,9 @@ class WebSocketServer {
       switch (msg.type) {
         case ClientSentWSMessageType.JoinWorld: {
           const { worldId } = (msg as WebSocketMessages.JoinWorldMessage).body
-          if (!worldStateObj[worldId].connectedUsers.has(userId)) {
-            throw new Error('User not found in world state. Please try to re-join the server')
-          }
+
+          // * Don't reject users if they didn't hit the /join route first, just add them to state
+          // todo: Should fix this to return a different message type which the UI can handle and display to user
           ;(socket as any).clientId = userId
           if (this.clients[worldId]) {
             this.clients[worldId].add(socket)
@@ -124,12 +119,11 @@ class WebSocketServer {
           let createdAt = Date.now()
           // * Begin: DB Call
           const messageInsertQuery =
-            'INSERT INTO worldMessages(text, authorId, worldId, created_at) VALUES($1, $2, $3, NOW()) RETURNING *'
+            'INSERT INTO worldMessages(text, authorId, worldId, createdAt) VALUES($1, $2, $3, CURRENT_TIMESTAMP) RETURNING *'
           const messageInsertValues = [text, userId, worldId]
           try {
-            const worldCreateRes = await db.query(messageInsertQuery, messageInsertValues)
-            console.info('created new worldMessages record: ', worldCreateRes.rows[0])
-            createdAt = worldCreateRes.rows[0].created_at
+            const messageCreateRes = await db.query(messageInsertQuery, messageInsertValues)
+            createdAt = messageCreateRes.rows[0].createdat
           } catch (err: any) {
             console.log(err.stack)
           }
@@ -149,10 +143,6 @@ class WebSocketServer {
             worldId,
             JSON.stringify(resultMessage) as unknown as Buffer
           )
-          //   const messageBuffer = parseMessageToBuffer(resultMessage)
-          //   if (messageBuffer) {
-          //     this.sendMessageToSameWorldClients(worldId, messageBuffer)
-          //   }
           break
         }
         default:
@@ -164,17 +154,9 @@ class WebSocketServer {
       }
 
       console.info(
-        'Processed message. Posted back to all clients with result: ',
+        'Finished processing message. Posted back to all clients with result: ',
         JSON.stringify(resultMessage)
       )
-
-      //   // Send a response back to the client
-      //   socket.send(`Received your message: ${message}`)
-
-      //   const messageBuffer = parseMessageToBuffer(resultMessage)
-      //   if (messageBuffer) {
-      //     this.server.clients.forEach((client) => client.send(JSON.stringify(resultMessage)))
-      //   }
     } catch (e: any) {
       console.error('Some unhandled error occured: ', e.message)
     }
