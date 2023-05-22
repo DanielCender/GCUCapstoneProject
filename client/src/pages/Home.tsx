@@ -78,12 +78,12 @@ const Home = () => {
             Current stable features:
             <li>Text chat</li>
             <li>Private World Spaces</li>
+            <li>Digital Whiteboard</li>
           </StyledList>
           <StyledList>
             Coming Soon!:
             <li>Voice chat</li>
-            <li>Digital Whiteboard</li>
-            <li>Interactable Virtual Environment</li>
+            <li>2D Virtual Environment</li>
           </StyledList>
           <TextBlock>{`Create an account and start collaborating today!`}</TextBlock>
         </TextActionBox>

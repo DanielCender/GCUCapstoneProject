@@ -44,7 +44,6 @@ export const WebSocketContextProvider: React.FunctionComponent<PropsWithChildren
     if (message === null) {
       console.warn('received unparsable message from service: ', event)
     }
-    console.log('message.body: ', message)
     switch (message?.type) {
       case ServerSentWSMessageType.ChatMessageSent: {
         addNewMessage((message as WebSocketMessages.ChatMessageSentMessage).body)
@@ -55,7 +54,6 @@ export const WebSocketContextProvider: React.FunctionComponent<PropsWithChildren
         break
       }
       case ServerSentWSMessageType.UserLeft: {
-        console.log('received a user left message')
         removeLeavingUser((message as WebSocketMessages.UserLeftMessage).body.id)
         break
       }
